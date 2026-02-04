@@ -296,6 +296,38 @@
    color: rgba(255,255,255,0.92) !important;
  }
 
+ /* ✨ Fade-in Product List */
+#product-list {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out;
+}
+
+#product-list.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 🧊 Sheet Slide Animation */
+#product-detail-overlay {
+  transition: opacity 0.22s ease-out;
+}
+
+#product-detail-overlay .glass {
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+#product-detail-overlay.is-open {
+  opacity: 1;
+}
+
+#product-detail-overlay.is-open .glass {
+  transform: translateY(0);
+}
+
  .status-badge {
    line-height: 1;
    position: absolute;
@@ -428,9 +460,15 @@
 
       container.appendChild(card);
     });
+   
+    // 🔴 ADD: trigger fade-in animation
+    requestAnimationFrame(() => {
+      container.classList.add('is-visible');
+    });
   }
 </script>
 
+ 
  <script>
    function renderProductDetail(product) {
      const container = document.getElementById('product-detail-content');
@@ -491,14 +529,27 @@
      `;
    }
 
-   function openProductDetail() {
-     document.getElementById('product-detail-overlay').style.display = 'block';
-   }
+function openProductDetail() {
+  const overlay = document.getElementById('product-detail-overlay');
+  overlay.style.display = 'block';
 
-   function closeProductDetail() {
-     document.getElementById('product-detail-overlay').style.display = 'none';
-     state.selectedProduct = null;
-   }
+  // 🔴 ADD: allow transition
+  requestAnimationFrame(() => {
+    overlay.classList.add('is-open');
+  });
+}
+
+function closeProductDetail() {
+  const overlay = document.getElementById('product-detail-overlay');
+  overlay.classList.remove('is-open');
+
+  // 🔴 ADD: wait for animation
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    state.selectedProduct = null;
+  }, 280);
+}
+
 
  function showLoading() {
    document.getElementById('loading-overlay').style.display = 'flex';
