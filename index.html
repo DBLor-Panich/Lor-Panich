@@ -86,10 +86,12 @@
  /* 🧊 Liquid Glass Base */
  .glass {
    position: relative;
-   background: var(--glass-bg);
-   backdrop-filter: var(--glass-blur);
-   -webkit-backdrop-filter: var(--glass-blur);
-   box-shadow: var(--glass-shadow), var(--glass-inner);
+   background: rgba(255,255,255,0.32);
+   backdrop-filter: blur(22px) saturate(160%);
+   -webkit-backdrop-filter: blur(22px) saturate(160%);
+   box-shadow:
+   0 12px 30px rgba(0,0,0,0.18),
+   inset 0 1px 0 rgba(255,255,255,0.5);
    border-radius: var(--radius-lg);
    border: 1px solid rgba(255,255,255,0.35);  /* 🔴 ADD */
 
