@@ -129,11 +129,21 @@
     padding: 16px 18px;          /* 🔴 CHANGED */
     min-height: 56px;            /* 🔴 ADD */
   }
-  .brand {
-    font-size: 17px;             /* 🔴 CHANGED */
-    font-weight: 600;
-    letter-spacing: -0.2px;      /* 🔴 ADD */
-  }
+ 
+.brand {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+
+  /* ✨ Warm Ivory Glow */
+  color: rgba(255,248,240,0.95);
+
+  text-shadow:
+    0 0 6px rgba(255,245,235,0.35),     /* inner soft ivory */
+    0 0 14px rgba(194,65,45,0.28),      /* warm red glow */
+    0 2px 8px rgba(0,0,0,0.35);         /* subtle grounding */
+}
+
   .menu-btn {
     font-size: 20px;
     background: none;
