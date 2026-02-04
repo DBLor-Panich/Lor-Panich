@@ -392,6 +392,15 @@
      document.getElementById('product-detail-overlay').style.display = 'none';
      state.selectedProduct = null;
    }
+
+ function showLoading() {
+   document.getElementById('loading-overlay').style.display = 'flex';
+ }
+
+ function hideLoading() {
+   document.getElementById('loading-overlay').style.display = 'none';
+ }
+
  </script>
  
 <!-- VIEWER FLOW -->
@@ -413,10 +422,13 @@
 <script>
   async function initApp() {
     try {
+     showLoading();     
       state.products = await ดึงรายการสินค้า();
       renderProductList();
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + err.message);
+   } finally {
+     hideLoading();     
     }
   }
 
@@ -442,5 +454,28 @@
    </div>
  </div>
 
+ <!-- GLOBAL LOADING OVERLAY -->
+ <div id="loading-overlay" style="
+   display:none;
+   position:fixed;
+   inset:0;
+   z-index:100;
+   background:rgba(255,255,255,0.15);
+   backdrop-filter: blur(6px);
+   -webkit-backdrop-filter: blur(6px);
+   display:flex;
+   align-items:center;
+   justify-content:center;
+ ">
+   <div class="glass" style="
+     padding:24px 28px;
+     font-size:15px;
+     font-weight:600;
+   ">
+     กำลังโหลดข้อมูล…
+   </div>
+ </div>
+ 
+ 
 </body>
 </html>
