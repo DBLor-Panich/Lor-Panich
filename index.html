@@ -110,10 +110,7 @@
     gap: 12px;
     padding: 14px;
     margin-bottom: 14px;
-    background: var(--card);
-    backdrop-filter: var(--blur);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    /* Material มาจาก .glass */
     cursor: pointer;
   }
   .product-image {
@@ -217,7 +214,7 @@
       const statusText = stock > 0 ? `คงเหลือ ${stock}` : 'สินค้าหมด';
 
       const card = document.createElement('div');
-      card.className = 'product-card';
+      card.className = 'product-card glass';
       card.innerHTML = `
         <div class="product-image">
           ${p['รูปสินค้า'] ? `<img src="${p['รูปสินค้า']}" />` : ''}
