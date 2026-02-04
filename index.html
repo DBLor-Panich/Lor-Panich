@@ -123,8 +123,15 @@
   /* Layout */
   main {
     padding: 16px;
+    min-height: 100vh;           /* 🔴 ADD */
   }
 
+/* 🔴 ADD: ป้องกัน ghost glass เมื่อไม่มีสินค้า */
+#product-list:empty {
+  background: none;
+  box-shadow: none;
+}
+ 
   /* Product Card */
   .product-card {
     display: flex;
