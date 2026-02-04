@@ -107,12 +107,17 @@
   /* Product Card */
   .product-card {
     display: flex;
-    gap: 12px;
-    padding: 14px;
+    gap: 14px;              /* 🔴 CHANGED */
+    padding: 16px;          /* 🔴 CHANGED */
     margin-bottom: 14px;
-    /* Material มาจาก .glass */
+  
     cursor: pointer;
+
+    /* Motion-ready */
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    will-change: transform;
   }
+ 
   .product-image {
     width: 72px;
     height: 72px;
@@ -130,24 +135,27 @@
     flex: 1;
   }
   .product-name {
-    font-weight: 600;
-    margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 16px;        /* 🔴 ADD */
+  line-height: 1.3;       /* 🔴 ADD */
+  margin-bottom: 2px;     /* 🔴 CHANGED */
   }
   .product-sku {
     font-size: 12px;
     color: var(--subtext);
-    margin-bottom: 8px;
+    margin-bottom: 10px;   /* 🔴 CHANGED */
   }
   .product-price {
-    font-weight: 600;
-    margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 15px;        /* 🔴 ADD */
+  margin-bottom: 6px;     /* 🔴 CHANGED */
   }
   .product-cost {
     font-size: 12px;
     color: var(--subtext);
   }
   .product-stock {
-    margin-top: 8px;
+    margin-top: 10px;      /* 🔴 CHANGED */
     font-size: 12px;
     color: var(--subtext);
   }
@@ -155,6 +163,11 @@
     color: var(--danger);
     font-weight: 600;
   }
+
+ .product-card:active {
+   transform: scale(0.985);      /* 🔴 ADD */
+ }
+
 
   /* Empty State */
   .empty {
