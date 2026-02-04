@@ -55,7 +55,7 @@
  }
  
  html, body {
-  height: 100%;
+  height: auto;
  }
 
   * { box-sizing: border-box; }
@@ -66,6 +66,8 @@
     color: var(--text);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    height: 100vh;
+    overflow: hidden;
   }
 
     body::before {
@@ -148,8 +150,10 @@
  
   /* Layout */
    main {
-     min-height: 100%;
-   }
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
 /* 🔴 ADD: ป้องกัน ghost glass เมื่อไม่มีสินค้า */
 #product-list:empty {
