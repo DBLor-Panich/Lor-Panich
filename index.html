@@ -254,7 +254,7 @@
 
     state.products.forEach(p => {
       const stock = Number(p['จำนวนคงเหลือ'] || 0);
-      const statusText = stock > 0 ? `คงเหลือ ${stock}` : 'สินค้าหมด';
+      const statusText = stock > 0 ? `คงเหลือ ${stock} ชิ้น` : 'สินค้าหมด';
 
       const card = document.createElement('div');
       card.className = 'product-card glass';
@@ -267,9 +267,9 @@
           <div class="product-sku">${p['รหัส SKU'] || ''}</div>
 
           <!-- 🔴 CHANGED: แสดงราคาทุนเท่านั้น -->
-          <div class="product-price">
-            ทุน ${p['ราคาทุน'] || 0}
-          </div>
+  <div class="product-cost">
+    ทุน ${p['ราคาทุน'] || 0} บาท
+  </div>
 
           <div class="product-stock ${stock === 0 ? 'status-out' : ''}">
             ${statusText}
@@ -319,7 +319,7 @@
           font-weight:600;
           margin-bottom:16px;
         ">
-         ราคาทุน ${product['ราคาทุน']}
+         ราคาทุน ${product['ราคาทุน']} บาท
        </div>
 
         <div style="margin-bottom:16px;">
