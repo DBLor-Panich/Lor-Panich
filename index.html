@@ -60,15 +60,29 @@
   }
 
   * { box-sizing: border-box; }
-  body {
+ body {
     margin: 0;
     font-family: "Sarabun", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--bg);
+    background: none;
     color: var(--text);
-    -webkit-font-smoothing: antialiased;   /* 🔴 ADD */
-    text-rendering: optimizeLegibility;    /* 🔴 ADD */   
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
+    body::before {
+     content: '';
+     position: fixed;        
+     inset: 0;
+     z-index: -1;
+     background:
+     url('https://images.pexels.com/photos/19425007/pexels-photo-19425007.jpeg')
+     center / cover no-repeat;
+    }
+ 
+    body {
+      overflow-x: hidden;
+    }
+ 
  /* 🧊 Liquid Glass Base */
  .glass {
    position: relative;
