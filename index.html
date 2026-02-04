@@ -274,8 +274,33 @@
    color: rgba(255,255,255,0.92) !important;
  }
 
+  /* 🟢🔴 Status Badge – Glass Pill */
+ .status-badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   padding: 4px 10px;
+   border-radius: 999px;
+   font-size: 11px;
+   font-weight: 600;
+   letter-spacing: 0.2px;
 
+   backdrop-filter: blur(12px) saturate(160%);
+   -webkit-backdrop-filter: blur(12px) saturate(160%);
 
+   border: 1px solid rgba(255,255,255,0.25);
+ }
+
+ .status-badge.available {
+   background: rgba(40,180,120,0.22);
+   color: rgba(220,255,240,0.95);
+ }
+
+ .status-badge.out {
+   background: rgba(255,80,80,0.25);
+   color: rgba(255,230,230,0.95);
+ }
+ 
   /* Empty State */
   .empty {
     text-align: center;
@@ -363,9 +388,13 @@
     ทุน ${p['ราคาทุน'] || 0} บาท
   </div>
 
-          <div class="product-stock ${stock === 0 ? 'status-out' : ''}">
-            ${statusText}
-          </div>
+           <div class="product-stock">
+             ${
+               stock > 0
+                 ? `<span class="status-badge available">พร้อมขาย</span>`
+                : `<span class="status-badge out">สินค้าหมด</span>`
+            }
+           </div>
         </div>
       `;
 
