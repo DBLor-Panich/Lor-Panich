@@ -26,7 +26,7 @@
    /* 🌈 Environment */
  --bg:
    url('https://images.pexels.com/photos/19425007/pexels-photo-19425007.jpeg')
-   center / contain no-repeat fixed;
+   center / cover no-repeat fixed;
 
    /* 🧊 Liquid Glass Material */
    --glass-bg: rgba(255,255,255,0.55);
@@ -53,6 +53,11 @@
    --radius-lg: 22px;
    --radius-md: 16px;
  }
+ 
+  html, body {
+   height: 100%;
+   min-height: 100%;
+  }
 
   * { box-sizing: border-box; }
   body {
