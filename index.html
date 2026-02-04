@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ระบบสต๊อกสินค้า</title>
+
+<!-- UI STYLE -->
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: rgba(255,255,255,0.75);
+    --blur: blur(12px);
+    --text: #1d1d1f;
+    --subtext: #6e6e73;
+    --accent: #007aff;
+    --danger: #ff3b30;
+    --radius: 16px;
+    --shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: var(--blur);
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+  }
+  .brand {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .menu-btn {
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Layout */
+  main {
+    padding: 16px;
+  }
+
+  /* Product Card */
+  .product-card {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+    background: var(--card);
+    backdrop-filter: var(--blur);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .product-image {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: #e5e5ea;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .product-info {
+    flex: 1;
+  }
+  .product-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .product-sku {
+    font-size: 12px;
+    color: var(--subtext);
+    margin-bottom: 8px;
+  }
+  .product-price {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .product-cost {
+    font-size: 12px;
+    color: var(--subtext);
+  }
+  .product-stock {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--subtext);
+  }
+  .status-out {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  /* Empty State */
+  .empty {
+    text-align: center;
+    color: var(--subtext);
+    margin-top: 40px;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- GLOBAL STATE -->
+<script>
+  const state = {
+    products: [],
+    cart: {
+      items: []
+    }
+  };
+</script>
+
+<!-- API LAYER (Google Apps Script) -->
+<script>
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
+
+  async function ดึงรายการสินค้า() {
+    const url = `${API_BASE}?action=ดึงรายการสินค้า`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.สถานะ !== 'สำเร็จ') {
+      throw new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้');
+    }
+    return data.ข้อมูล.รายการสินค้า;
+  }
+</script>
+
+<!-- RENDER FUNCTIONS -->
+<script>
+  function renderProductList() {
+    const container = document.getElementById('product-list');
+    container.innerHTML = '';
+
+    if (!state.products || state.products.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          ยังไม่มีสินค้าในระบบ
+        </div>
+      `;
+      return;
+    }
+
+    state.products.forEach(p => {
+      const stock = Number(p['จำนวนคงเหลือ'] || 0);
+      const statusText = stock > 0 ? `คงเหลือ ${stock}` : 'สินค้าหมด';
+
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-image">
+          ${p['รูปสินค้า'] ? `<img src="${p['รูปสินค้า']}" />` : ''}
+        </div>
+        <div class="product-info">
+          <div class="product-name">${p['ชื่อสินค้า'] || '-'}</div>
+          <div class="product-sku">${p['รหัส SKU'] || ''}</div>
+          <div class="product-price">฿ ${p['ราคาขาย'] || 0}</div>
+          <div class="product-cost">ทุน ฿ ${p['ราคาทุน'] || 0}</div>
+          <div class="product-stock ${stock === 0 ? 'status-out' : ''}">
+            ${statusText}
+          </div>
+        </div>
+      `;
+
+      card.onclick = () => {
+        alert('หน้ารายละเอียดสินค้า (จะทำใน STEP ถัดไป)');
+      };
+
+      container.appendChild(card);
+    });
+  }
+</script>
+
+<!-- VIEWER FLOW -->
+<header>
+  <div class="header-inner">
+    <div class="brand">ระบบสต๊อกสินค้า</div>
+    <button class="menu-btn">☰</button>
+  </div>
+</header>
+
+<main>
+  <div id="product-list"></div>
+</main>
+
+<!-- ADMIN FLOW -->
+<!-- (ยังไม่เริ่มใน STEP นี้) -->
+
+<!-- INIT APP -->
+<script>
+  async function initApp() {
+    try {
+      state.products = await ดึงรายการสินค้า();
+      renderProductList();
+    } catch (err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    }
+  }
+
+  initApp();
+</script>
+
+</body>
+</html>
