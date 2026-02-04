@@ -67,7 +67,6 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     height: 100vh;
-    overflow: hidden;
   }
 
     body::before {
@@ -183,7 +182,8 @@
     border-radius: 12px;
     background: #e5e5ea;
     flex-shrink: 0;
-    overflow: hidden;
+ overflow: visible;
+ position: relative;
   }
   .product-image img {
     width: 100%;
@@ -274,11 +274,6 @@
    color: rgba(255,255,255,0.92) !important;
  }
 
- /* 🟢🔴 Status Badge – Under Product Image */
- .product-image {
-   position: relative;
- }
-
  .status-badge {
    position: absolute;
    bottom: -6px;
@@ -303,11 +298,6 @@
  .status-badge.out {
    background: rgba(255,80,80,0.28);
    color: rgba(255,235,235,0.95);
- }
-
- /* 🔧 Fix: Allow status badge to overflow image container */
- .product-image {
-   overflow: visible;
  }
  
   /* Empty State */
@@ -380,8 +370,7 @@
 
     state.products.forEach(p => {
       const stock = Number(p['จำนวนคงเหลือ'] || 0);
-      const statusText = stock > 0 ? `คงเหลือ ${stock} ชิ้น` : 'สินค้าหมด';
-
+      
       const card = document.createElement('div');
       card.className = 'product-card glass';
       card.innerHTML = `
