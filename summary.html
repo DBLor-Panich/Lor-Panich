@@ -98,6 +98,45 @@
 
 <body>
 
+<script>
+  const raw = sessionStorage.getItem('order_summary');
+  if (!raw) {
+    alert('ไม่พบข้อมูลคำสั่งซื้อ');
+  } else {
+    const data = JSON.parse(raw);
+    const items = data.items || [];
+
+    const container = document.getElementById('order-items');
+    const totalEl = document.getElementById('order-total');
+
+    let total = 0;
+
+    items.forEach(item => {
+      const subtotal = item.ราคาทุน * item.จำนวน;
+      total += subtotal;
+
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="product">
+          ${item.รูปสินค้า ? `<img src="${item.รูปสินค้า}" />` : ''}
+        </div>
+        <div>
+          <div><strong>${item.ชื่อสินค้า}</strong></div>
+          <div style="font-size:11px;color:#555;">SKU: ${item['รหัส SKU']}</div>
+        </div>
+        <div class="center">${item.จำนวน}</div>
+        <div class="right">${item.ราคาทุน}</div>
+        <div class="right">${subtotal}</div>
+      `;
+
+      container.appendChild(row);
+    });
+
+    totalEl.innerText = `รวมทั้งสิ้น: ${total} บาท`;
+  }
+</script>
+  
 <div class="a4-page">
 
   <div class="header">
@@ -120,24 +159,13 @@
       <div class="right">รวม</div>
     </div>
 
-    <!-- MOCK ROW -->
-    <div class="row">
-      <div class="product">
-        <img src="" alt="">
-      </div>
-      <div>
-        <div><strong>ชื่อสินค้า</strong></div>
-        <div style="font-size:11px;color:#555;">SKU: XXX</div>
-      </div>
-      <div class="center">1</div>
-      <div class="right">8</div>
-      <div class="right">8</div>
-    </div>
+    <!-- REAL ITEMS -->
+    <div id="order-items"></div>
 
   </div>
 
   <div class="footer">
-    <div class="total">รวมทั้งสิ้น: ______ บาท</div>
+    <div class="total" id="order-total">รวมทั้งสิ้น: 0 บาท</div>
     <div>ผู้จัดทำ ____________________</div>
   </div>
 
