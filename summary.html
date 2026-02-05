@@ -20,7 +20,7 @@
     margin: 24px auto;
     background: #fff;
     color: #000;
-    padding: 22mm 20mm 20mm;
+    padding: 26mm 22mm 22mm;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     page-break-after: always;
   display: flex;
@@ -33,9 +33,15 @@
   
   .header {
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 28px;
   }
 
+ .header::after {
+   content: '';
+   display: block;
+   margin-top: 18px;
+   border-bottom: 2px solid #000;
+ }
   .shop-name {
     font-size: 20px;
     font-weight: 800;
@@ -55,7 +61,7 @@
   }
 
   .table {
-    border-top: 1px solid #000;
+    border-top: 2px solid #000;
     padding-top: 6px;
   }
 
@@ -64,7 +70,7 @@
     grid-template-columns: 50px 1fr 60px 70px 80px;
     gap: 8px;
     padding: 10px 0;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1.5px solid #999;
     font-size: 13px;
   }
 
@@ -86,13 +92,14 @@
     margin-top: auto;
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    padding-top: 10px;
-    border-top: 1px solid #000;
+  font-size: 15px;
+  padding-top: 14px;
+  border-top: 2px solid #000;
   }
 
   .total {
-    font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   }
 
   @media print {
