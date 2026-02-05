@@ -982,6 +982,14 @@ if (!state.cart.items.length) {
   return;
 }
 
+ // ✅ STEP 9.x — unlock summary when cart has items
+ const btn = document.getElementById('btn-summary');
+ if (btn) {
+   btn.disabled = false;
+   btn.style.opacity = '1';
+   btn.style.cursor = 'pointer';
+ }  
+
    if (cartBtn) cartBtn.style.display = 'flex';
 
    if (badge) {
