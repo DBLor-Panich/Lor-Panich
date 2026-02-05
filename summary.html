@@ -97,7 +97,8 @@
 </head>
 
 <body>
-
+<div id="pages-root"></div>
+  
 <script>
   const raw = sessionStorage.getItem('order_summary');
   if (!raw) {
@@ -106,9 +107,44 @@
     const data = JSON.parse(raw);
     const items = data.items || [];
 
-    const container = document.getElementById('order-items');
-    const totalEl = document.getElementById('order-total');
+    const pagesRoot = document.getElementById('pages-root');
 
+    function createPage() {
+      const page = document.createElement('div');
+      page.className = 'a4-page';
+      page.innerHTML = `
+        <div class="header">
+          <div class="shop-name">ร้านค้า Lor-Panich</div>
+          <div class="doc-title">สรุปรายการสั่งซื้อ</div>
+        </div>
+
+        <div class="meta">
+          <div>วันที่: __________</div>
+          <div>เลขที่เอกสาร: __________</div>
+        </div>
+
+        <div class="table">
+          <div class="row header">
+            <div>สินค้า</div>
+            <div>รายละเอียด</div>
+            <div class="center">จำนวน</div>
+            <div class="right">ราคา</div>
+            <div class="right">รวม</div>
+          </div>
+          <div class="order-items"></div>
+        </div>
+   <div class="footer">
+     <div class="total">รวมทั้งสิ้น: 0 บาท</div>
+     <div>ผู้จัดทำ ____________________</div>
+   </div>
+      `;
+      pagesRoot.appendChild(page);
+      return page;
+    }
+
+    let currentPage = createPage();
+    let itemsContainer = currentPage.querySelector('.order-items');
+    let totalEl = currentPage.querySelector('.total');
     let total = 0;
 
     items.forEach(item => {
@@ -130,47 +166,23 @@
         <div class="right">${subtotal}</div>
       `;
 
-      container.appendChild(row);
+      itemsContainer.appendChild(row);
+
+      // 🔴 ตรวจ overflow
+      if (itemsContainer.scrollHeight > itemsContainer.clientHeight) {
+        itemsContainer.removeChild(row);
+        currentPage = createPage();
+        itemsContainer = currentPage.querySelector('.order-items');
+        totalEl = currentPage.querySelector('.total');
+        itemsContainer.appendChild(row);
+     }
     });
 
     totalEl.innerText = `รวมทั้งสิ้น: ${total} บาท`;
-  }
+   }
+  
 </script>
   
-<div class="a4-page">
-
-  <div class="header">
-    <div class="shop-name">ร้านค้า Lor-Panich</div>
-    <div class="doc-title">สรุปรายการสั่งซื้อ</div>
-  </div>
-
-  <div class="meta">
-    <div>วันที่: __________</div>
-    <div>เลขที่เอกสาร: __________</div>
-  </div>
-
-  <div class="table">
-
-    <div class="row header">
-      <div>สินค้า</div>
-      <div>รายละเอียด</div>
-      <div class="center">จำนวน</div>
-      <div class="right">ราคา</div>
-      <div class="right">รวม</div>
-    </div>
-
-    <!-- REAL ITEMS -->
-    <div id="order-items"></div>
-
-  </div>
-
-  <div class="footer">
-    <div class="total" id="order-total">รวมทั้งสิ้น: 0 บาท</div>
-    <div>ผู้จัดทำ ____________________</div>
-  </div>
-
-</div>
-
 </body>
 </html>
 
