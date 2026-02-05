@@ -862,8 +862,12 @@ function closeConfirmAdd() {
  }
 
  function confirmSummary() {
-   closeConfirmSummary();
-   goToSummary();
+  closeConfirmSummary();
+
+  // 🔓 ensure browser treats this as direct user action
+  setTimeout(() => {
+    goToSummary();
+  }, 0);
  }
   
 function addToCartConfirmed() {
