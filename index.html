@@ -526,6 +526,32 @@
            ${stock === 0 ? 'สินค้าหมด' : stock + ' ชิ้น'}
          </strong>
        </div>
+
+       <!-- 🔴 ADD: Add to Cart Button -->
+<div style="margin-top:24px;">
+  <button
+    onclick="confirmAddToCart()"
+    style="
+      width:100%;
+      padding:14px 16px;
+      font-size:16px;
+      font-weight:600;
+      border-radius:16px;
+      border:none;
+      cursor:pointer;
+
+      background: rgba(194,65,45,0.85);
+      color: #fff;
+
+      box-shadow:
+        0 8px 24px rgba(194,65,45,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+    "
+  >
+    เพิ่มเข้าตะกร้า
+  </button>
+</div>
+
      `;
    }
 
@@ -550,7 +576,46 @@ function closeProductDetail() {
   }, 280);
 }
 
+// 🛒 STEP 5: Add to Cart (View-only product)
+function confirmAddToCart() {
+  document.getElementById('confirm-add-overlay').style.display = 'block';
+}
 
+function closeConfirmAdd() {
+  document.getElementById('confirm-add-overlay').style.display = 'none';
+}
+
+function addToCartConfirmed() {
+  const product = state.selectedProduct;
+  if (!product) return;
+
+  addToCart(product);
+  closeConfirmAdd();
+  closeProductDetail();
+}
+
+function addToCart(product) {
+  // 🔒 STEP 5: ยังไม่เลือกจำนวน → qty = 1 เสมอ
+  const existing = state.cart.items.find(
+    item => item['รหัส SKU'] === product['รหัส SKU']
+  );
+
+  if (existing) {
+    // ❌ ยังไม่เพิ่มจำนวนใน STEP นี้
+    return;
+  }
+
+  state.cart.items.push({
+    รหัส SKU: product['รหัส SKU'],
+    ชื่อสินค้า: product['ชื่อสินค้า'],
+    ราคาทุน: product['ราคาทุน'],
+    qty: 1
+});
+
+  console.log('ตะกร้าปัจจุบัน:', state.cart.items);
+}
+
+  
  function showLoading() {
    document.getElementById('loading-overlay').style.display = 'flex';
  }
@@ -633,7 +698,66 @@ function closeProductDetail() {
      กำลังโหลดข้อมูล…
    </div>
  </div>
- 
+
+ <!-- 🧾 CONFIRM ADD TO CART -->
+<div id="confirm-add-overlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:60;
+  background:rgba(0,0,0,0.35);
+">
+  <div class="glass" style="
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:90%;
+    max-width:360px;
+    padding:20px;
+  ">
+    <div style="font-size:16px;font-weight:600;margin-bottom:12px;">
+      ยืนยันการเพิ่มสินค้า
+    </div>
+
+    <div style="font-size:14px;color:rgba(255,255,255,0.75);margin-bottom:20px;">
+      ต้องการเพิ่มสินค้านี้เข้าตะกร้าหรือไม่
+    </div>
+
+    <div style="display:flex;gap:12px;">
+      <button
+        onclick="closeConfirmAdd()"
+        style="
+          flex:1;
+          padding:12px;
+          border-radius:14px;
+          border:none;
+          background:rgba(255,255,255,0.15);
+          color:#fff;
+          font-weight:600;
+        "
+      >
+        ยกเลิก
+      </button>
+
+      <button
+        onclick="addToCartConfirmed()"
+        style="
+          flex:1;
+          padding:12px;
+          border-radius:14px;
+          border:none;
+          background:rgba(194,65,45,0.9);
+          color:#fff;
+          font-weight:600;
+        "
+      >
+        ยืนยัน
+      </button>
+    </div>
+  </div>
+</div>
+
  
 </body>
 </html>
