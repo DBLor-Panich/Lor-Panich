@@ -376,7 +376,98 @@
    background: rgba(255,80,80,0.28);
    color: rgba(255,235,235,0.95);
  }
- 
+
+/* 🛒 STEP 7.1 – Cart Overlay */
+#cart-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:90;
+  background:rgba(0,0,0,0.35);
+}
+
+#cart-overlay .cart-sheet {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  max-height:90%;
+  padding:16px;
+  border-radius:24px 24px 0 0;
+  display:flex;
+  flex-direction:column;
+}
+
+.cart-header {
+  font-size:17px;
+  font-weight:600;
+  margin-bottom:12px;
+  color:rgba(255,255,255,0.95);
+}
+
+.cart-list {
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.cart-item {
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border-radius:16px;
+}
+
+.cart-item-img {
+  width:48px;
+  height:48px;
+  border-radius:10px;
+  background:#e5e5ea;
+  flex-shrink:0;
+}
+
+.cart-item-info {
+  flex:1;
+}
+
+.cart-item-name {
+  font-size:14px;
+  font-weight:600;
+  color:rgba(255,255,255,0.95);
+}
+
+.cart-item-sku {
+  font-size:12px;
+  color:rgba(255,255,255,0.65);
+  margin-bottom:6px;
+}
+
+.cart-item-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
+  color:rgba(255,255,255,0.85);
+}
+
+.cart-item-remove {
+  font-size:12px;
+  color:#ff3b30;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.cart-summary {
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.18);
+  font-size:15px;
+  font-weight:600;
+  color:#fff;
+}
+
   /* Empty State */
   .empty {
     text-align: center;
@@ -994,6 +1085,46 @@ box-shadow:
    </div>
  </div>
 
+<!-- 🛒 CART OVERLAY (STEP 7.1 – UI ONLY) -->
+<div id="cart-overlay">
+  <div class="glass cart-sheet">
+
+    <div class="cart-header">
+      ตะกร้าสินค้า
+    </div>
+
+    <!-- 📜 Cart List (Scrollable) -->
+    <div class="cart-list">
+
+      <!-- 🧾 Cart Item (Mock 1 รายการ) -->
+      <div class="cart-item glass">
+        <div class="cart-item-img"></div>
+
+        <div class="cart-item-info">
+          <div class="cart-item-name">ชื่อสินค้า</div>
+          <div class="cart-item-sku">SKU: P-001</div>
+
+          <div class="cart-item-row">
+            <div>จำนวน: 1</div>
+            <div>ทุน 8 บาท</div>
+          </div>
+
+          <div class="cart-item-row" style="justify-content:flex-end;">
+            <div class="cart-item-remove">ลบ</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 💰 Summary -->
+    <div class="cart-summary">
+      รวมยอด: 8 บาท
+    </div>
+
+  </div>
+</div>
+ 
  
 </body>
 </html>
