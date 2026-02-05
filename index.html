@@ -668,7 +668,7 @@ function addToCart(product) {
 const qty = Number(document.getElementById('qty-input')?.value || 1);
 
 state.cart.items.push({
-  รหัส SKU: product['รหัส SKU'],
+  'รหัส SKU': product['รหัส SKU'],
   ชื่อสินค้า: product['ชื่อสินค้า'],
   ราคาทุน: product['ราคาทุน'],
   qty: qty
