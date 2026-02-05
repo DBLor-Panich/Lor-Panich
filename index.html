@@ -331,15 +331,17 @@
  /* 🔧 STEP 6.2 – Shake Animation (Quantity Error Feedback) */
  @keyframes shake {
    0%   { transform: translateX(0); }
-   20%  { transform: translateX(-6px); }
-   40%  { transform: translateX(6px); }
-   60%  { transform: translateX(-4px); }
-   80%  { transform: translateX(4px); }
+   15%  { transform: translateX(-14px); }
+   30%  { transform: translateX(14px); }
+   45%  { transform: translateX(-10px); }
+   60%  { transform: translateX(10px); }
+   75%  { transform: translateX(-6px); }
+   90%  { transform: translateX(6px); }
    100% { transform: translateX(0); }
  }
 
  .shake {
-   animation: shake 0.32s ease-in-out;
+   animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
  }
  
  /* 🚫 LOCK Interaction ใต้ Alert (STEP 6.1) */
@@ -679,12 +681,12 @@ state.cart.items.push({
    document.getElementById('quantity-overlay')?.setAttribute('data-lock', 'true');
   
    // 🔴 STEP 6.2 – Trigger shake on input
-   const input = document.getElementById('final-qty-input');
-   if (input) {
-     input.classList.remove('shake');
-     void input.offsetWidth; // force reflow
-     input.classList.add('shake');
-   }
+  const panel = document.querySelector('#quantity-overlay .glass');
+  if (panel) {
+    panel.classList.remove('shake');
+    void panel.offsetWidth; // force reflow
+    panel.classList.add('shake');
+  }
  }
 
  function closeAlert() {
