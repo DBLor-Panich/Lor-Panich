@@ -947,6 +947,12 @@ state.cart.items.push({
    list.innerHTML = '';
 
 if (!state.cart.items.length) {
+ const btn = document.getElementById('btn-summary');
+ if (btn) {
+   btn.disabled = true;
+   btn.style.opacity = '0.5';
+   btn.style.cursor = 'not-allowed';
+ }
   if (cartBtn) cartBtn.style.display = 'none';
   if (badge) {
    badge.classList.remove('show');
@@ -1441,7 +1447,7 @@ box-shadow:
     <!-- 💰 Summary -->
     <div class="cart-summary">
    <div id="cart-total">รวมยอด: 0 บาท</div>
-   <button onclick="goToSummary()" style="
+   <button id="btn-summary" onclick="goToSummary()" disabled style="
      margin-top:12px;
      width:100%;
      padding:12px;
@@ -1454,6 +1460,8 @@ box-shadow:
        rgba(40,90,220,0.92)
      );
      color:#fff;
+    opacity:0.5;
+    cursor:not-allowed;
    ">
      สรุปรายการ
    </button>
