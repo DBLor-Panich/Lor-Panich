@@ -131,10 +131,10 @@
             <div class="right">ราคา</div>
             <div class="right">รวม</div>
           </div>
-          <div class="order-items"></div>
+          <div class="order-items" style="min-height:180mm;"></div>
         </div>
-   <div class="footer">
-     <div class="total">รวมทั้งสิ้น: 0 บาท</div>
+  <div class="footer">
+     <div class="total"></div>
      <div>ผู้จัดทำ ____________________</div>
    </div>
       `;
@@ -144,12 +144,15 @@
 
     let currentPage = createPage();
     let itemsContainer = currentPage.querySelector('.order-items');
-    let totalEl = currentPage.querySelector('.total');
+    let pageTotalEl = currentPage.querySelector('.total');
+
     let total = 0;
+    let pageTotal = 0;
 
     items.forEach(item => {
       const subtotal = item.ราคาทุน * item.จำนวน;
       total += subtotal;
+      pageTotal += subtotal;
 
       const row = document.createElement('div');
       row.className = 'row';
@@ -162,24 +165,26 @@
           <div style="font-size:11px;color:#555;">SKU: ${item['รหัส SKU']}</div>
         </div>
         <div class="center">${item.จำนวน}</div>
-        <div class="right">${item.ราคาทุน}</div>
-        <div class="right">${subtotal}</div>
+ <div class="right">${item.ราคาทุน.toLocaleString()}</div>
+ <div class="right">${subtotal.toLocaleString()}</div>
       `;
 
       itemsContainer.appendChild(row);
 
       // 🔴 ตรวจ overflow
       if (itemsContainer.scrollHeight > itemsContainer.clientHeight) {
+        pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal - subtotal} บาท`;
         itemsContainer.removeChild(row);
         currentPage = createPage();
         itemsContainer = currentPage.querySelector('.order-items');
-        totalEl = currentPage.querySelector('.total');
+        pageTotalEl = currentPage.querySelector('.total');
+        pageTotal = subtotal;
         itemsContainer.appendChild(row);
      }
     });
 
-    totalEl.innerText = `รวมทั้งสิ้น: ${total} บาท`;
-   }
+     pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal.toLocaleString()} บาท`;
+  }
   
 </script>
   
