@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปรายการสั่งซื้อ – Lor-Panich</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #e5e5e5;
+    font-family: "Sarabun", sans-serif;
+  }
+
+  /* A4 PAGE */
+  .a4-page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 24px auto;
+    background: #fff;
+    color: #000;
+    padding: 20mm 18mm;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    page-break-after: always;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .shop-name {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .doc-title {
+    font-size: 16px;
+    margin-top: 4px;
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .table {
+    border-top: 1px solid #000;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 50px 1fr 60px 70px 80px;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #ccc;
+    font-size: 13px;
+  }
+
+  .row.header {
+    font-weight: 600;
+    border-bottom: 2px solid #000;
+  }
+
+  .product img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+  }
+
+  .center { text-align: center; }
+  .right  { text-align: right; }
+
+  .footer {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  .total {
+    font-weight: 700;
+  }
+
+  @media print {
+    body {
+      background: none;
+    }
+    .a4-page {
+      margin: 0;
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="a4-page">
+
+  <div class="header">
+    <div class="shop-name">ร้านค้า Lor-Panich</div>
+    <div class="doc-title">สรุปรายการสั่งซื้อ</div>
+  </div>
+
+  <div class="meta">
+    <div>วันที่: __________</div>
+    <div>เลขที่เอกสาร: __________</div>
+  </div>
+
+  <div class="table">
+
+    <div class="row header">
+      <div>สินค้า</div>
+      <div>รายละเอียด</div>
+      <div class="center">จำนวน</div>
+      <div class="right">ราคา</div>
+      <div class="right">รวม</div>
+    </div>
+
+    <!-- MOCK ROW -->
+    <div class="row">
+      <div class="product">
+        <img src="" alt="">
+      </div>
+      <div>
+        <div><strong>ชื่อสินค้า</strong></div>
+        <div style="font-size:11px;color:#555;">SKU: XXX</div>
+      </div>
+      <div class="center">1</div>
+      <div class="right">8</div>
+      <div class="right">8</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="total">รวมทั้งสิ้น: ______ บาท</div>
+    <div>ผู้จัดทำ ____________________</div>
+  </div>
+
+</div>
+
+</body>
+</html>
 
