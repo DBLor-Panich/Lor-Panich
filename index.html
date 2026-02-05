@@ -527,6 +527,47 @@
          </strong>
        </div>
 
+<!-- 🔴 ADD: Quantity Input -->
+<div style="margin-top:16px;">
+  <div style="
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:rgba(255,255,255,0.85);
+  ">
+    จำนวนที่ต้องการ
+  </div>
+
+  <input
+    id="qty-input"
+    type="number"
+    min="1"
+    value="1"
+    style="
+      width:100%;
+      padding:12px 14px;
+      font-size:16px;
+      border-radius:14px;
+      border:none;
+      outline:none;
+
+      background:rgba(255,255,255,0.15);
+      color:#fff;
+
+      box-shadow:
+        inset 0 1px 3px rgba(0,0,0,0.35);
+    "
+  />
+
+  <div style="
+    margin-top:6px;
+    font-size:12px;
+    color:rgba(255,255,255,0.7);
+  ">
+    สต๊อกคงเหลือ ${stock} ชิ้น
+  </div>
+</div>
+
        <!-- 🔴 ADD: Add to Cart Button -->
 <div style="margin-top:24px;">
   <button
@@ -582,8 +623,23 @@ function closeProductDetail() {
 
 // 🛒 STEP 5: Add to Cart (View-only product)
 function confirmAddToCart() {
+  const input = document.getElementById('qty-input');
+  const qty = Number(input?.value || 0);
+  const stock = Number(state.selectedProduct?.['จำนวนคงเหลือ'] || 0);
+
+  if (qty < 1) {
+    alert('กรุณาระบุจำนวนอย่างน้อย 1 ชิ้น');
+    return;
+  }
+
+  if (qty > stock) {
+    alert('จำนวนที่ระบุเกินสต๊อกที่มีอยู่');
+    return;
+  }
+
   document.getElementById('confirm-add-overlay').style.display = 'block';
 }
+
 
 function closeConfirmAdd() {
   document.getElementById('confirm-add-overlay').style.display = 'none';
@@ -609,11 +665,13 @@ function addToCart(product) {
     return;
   }
 
-  state.cart.items.push({
-  'รหัส SKU': product['รหัส SKU'],
-  'ชื่อสินค้า': product['ชื่อสินค้า'],
-  'ราคาทุน': product['ราคาทุน'],
-    qty: 1
+const qty = Number(document.getElementById('qty-input')?.value || 1);
+
+state.cart.items.push({
+  รหัส SKU: product['รหัส SKU'],
+  ชื่อสินค้า: product['ชื่อสินค้า'],
+  ราคาทุน: product['ราคาทุน'],
+  qty: qty
 });
 
   console.log('ตะกร้าปัจจุบัน:', state.cart.items);
