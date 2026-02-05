@@ -92,11 +92,34 @@
       margin: 0;
       box-shadow: none;
     }
+     #print-bar {
+     display: none;
+   }
   }
 </style>
 </head>
 
 <body>
+ <div id="print-bar" style="
+   position:sticky;
+   top:0;
+   z-index:10;
+   padding:12px;
+   background:#e5e5e5;
+   text-align:right;
+ ">
+   <button id="btn-print" style="
+    padding:10px 16px;
+     font-size:14px;
+     font-weight:600;
+     border-radius:10px;
+     border:none;
+     cursor:pointer;
+   ">
+     🖨 พิมพ์ / บันทึก PDF
+  </button>
+ </div>
+  
 <div id="pages-root"></div>
   
 <script>
@@ -106,6 +129,26 @@
   } else {
     const data = JSON.parse(raw);
     const items = data.items || [];
+
+ // STEP 8.5 — Auto-fill document meta
+ const createdAt = data.createdAt
+   ? new Date(data.createdAt)
+   : new Date();
+
+ const docDate = createdAt.toLocaleDateString('th-TH', {
+   year: 'numeric',
+   month: 'long',
+   day: 'numeric'
+ });
+
+ const docNo =
+   'LP-' +
+   createdAt.getFullYear().toString().slice(-2) +
+   (createdAt.getMonth() + 1).toString().padStart(2, '0') +
+   createdAt.getDate().toString().padStart(2, '0') +
+   '-' +
+   createdAt.getTime().toString().slice(-4);
+
 
     const pagesRoot = document.getElementById('pages-root');
 
@@ -118,10 +161,10 @@
           <div class="doc-title">สรุปรายการสั่งซื้อ</div>
         </div>
 
-        <div class="meta">
-          <div>วันที่: __________</div>
-          <div>เลขที่เอกสาร: __________</div>
-        </div>
+ <div class="meta">
+   <div>วันที่: <span class="doc-date"></span></div>
+   <div>เลขที่เอกสาร: <span class="doc-no"></span></div>
+ </div>
 
         <div class="table">
           <div class="row header">
@@ -138,6 +181,8 @@
      <div>ผู้จัดทำ ____________________</div>
    </div>
       `;
+      page.querySelector('.doc-date').innerText = docDate;
+      page.querySelector('.doc-no').innerText = docNo;
       pagesRoot.appendChild(page);
       return page;
     }
@@ -186,6 +231,13 @@
      pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal.toLocaleString()} บาท`;
   }
   
+ // STEP 8.6 — Print / PDF
+ const printBtn = document.getElementById('btn-print');
+ if (printBtn) {
+   printBtn.onclick = () => {
+     window.print();
+   };
+ }
 </script>
   
 </body>
