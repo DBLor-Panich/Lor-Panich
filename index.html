@@ -1286,7 +1286,20 @@ box-shadow:
   <div class="glass cart-sheet">
 
     <div class="cart-header">
-      ตะกร้าสินค้า
+       <div style="display:flex;justify-content:space-between;align-items:center;">
+    <span>ตะกร้าสินค้า</span>
+    <button
+      onclick="closeCart()"
+      style="
+        background:none;
+        border:none;
+        font-size:18px;
+        color:rgba(255,255,255,0.9);
+        cursor:pointer;
+      "
+      aria-label="ปิดตะกร้า"
+    >✕</button>
+  </div>
     </div>
 
     <!-- 📜 Cart List (Scrollable) -->
