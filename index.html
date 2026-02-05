@@ -790,10 +790,12 @@ state.cart.items.push({
  function renderCart() {
    const list = document.querySelector('#cart-overlay .cart-list');
    const summary = document.querySelector('#cart-overlay .cart-summary');
+   const cartBtn = document.getElementById('cart-btn');
 
    list.innerHTML = '';
 
    if (!state.cart.items.length) {
+     if (cartBtn) cartBtn.style.display = 'none';
      list.innerHTML = `
        <div class="empty" style="color:rgba(255,255,255,0.7);">
          ยังไม่มีสินค้าในตะกร้า
@@ -803,6 +805,8 @@ state.cart.items.push({
      return;
    }
 
+   if (cartBtn) cartBtn.style.display = 'flex';
+  
    let total = 0;
 
    state.cart.items.forEach((item, index) => {
@@ -896,14 +900,36 @@ state.cart.items.push({
    };
  });
 }
- 
+
+ // 🛒 STEP 7.4 – Open / Close Cart Overlay
+ function openCart() {
+   if (!state.cart.items.length) return;
+
+   const overlay = document.getElementById('cart-overlay');
+   overlay.style.display = 'block';
+ }
+
+ function closeCart() {
+   const overlay = document.getElementById('cart-overlay');
+   overlay.style.display = 'none';
+ }
+ // 🔒 Close cart when tapping backdrop
+ document.getElementById('cart-overlay')?.addEventListener('click', (e) => {
+   if (e.target.id === 'cart-overlay') {
+     closeCart();
+   }
+ });
+  
  </script>
  
 <!-- VIEWER FLOW -->
 <header>
   <div class="header-inner">
     <div class="brand">ร้านค้า Lor-Panich</div>
-    <button class="menu-btn">☰</button>
+   <div style="display:flex;gap:8px;align-items:center;">
+     <button id="cart-btn" class="menu-btn" style="display:none;">🛒</button>
+     <button class="menu-btn">☰</button>
+   </div>
   </div>
 </header>
 
