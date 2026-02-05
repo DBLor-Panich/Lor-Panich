@@ -328,6 +328,11 @@
   transform: translateY(0);
 }
 
+ /* 🚫 LOCK Interaction ใต้ Alert (STEP 6.1) */
+ #quantity-overlay[data-lock="true"] {
+   pointer-events: none;
+ }
+
  .status-badge {
    line-height: 1;
    position: absolute;
@@ -615,12 +620,12 @@ function confirmQuantity() {
   const stock = Number(state.selectedProduct['จำนวนคงเหลือ'] || 0);
 
   if (qty < 1) {
-    alert('กรุณาระบุจำนวนอย่างน้อย 1 ชิ้น');
+    showAlert('กรุณาระบุจำนวนอย่างน้อย 1 ชิ้น');
     return;
   }
 
   if (qty > stock) {
-    alert('จำนวนที่ระบุเกินสต๊อกที่มีอยู่');
+    showAlert('จำนวนที่ระบุเกินสต๊อกที่มีอยู่');
     return;
   }
 
@@ -650,6 +655,17 @@ state.cart.items.push({
   console.log('ตะกร้าปัจจุบัน:', state.cart.items);
 }
 
+ function showAlert(message) {
+   document.getElementById('alert-message').innerText = message;
+   document.getElementById('alert-overlay').style.display = 'block';
+   document.getElementById('quantity-overlay')?.setAttribute('data-lock', 'true');
+ }
+
+ function closeAlert() {
+   document.getElementById('alert-overlay').style.display = 'none';
+   document.getElementById('quantity-overlay')?.removeAttribute('data-lock');
+ }
+  
  </script>
  
 <!-- VIEWER FLOW -->
@@ -901,6 +917,55 @@ box-shadow:
     </div>
   </div>
 </div>
+
+ <!-- ⚠️ THEMED ALERT OVERLAY -->
+ <div id="alert-overlay" style="
+   display:none;
+   position:fixed;
+   inset:0;
+   z-index:80;
+  background:rgba(0,0,0,0.35);
+  pointer-events:auto;
+ ">
+   <div class="glass" style="
+     position:absolute;
+     left:50%;
+     top:50%;
+     transform:translate(-50%,-50%);
+     width:90%;
+     max-width:320px;
+     padding:20px;
+     text-align:center;
+   ">
+     <div id="alert-message" style="
+       font-size:15px;
+       font-weight:600;
+       color:#ffffff;
+       margin-bottom:18px;
+       text-shadow:0 1px 4px rgba(0,0,0,0.35);
+     "></div>
+
+     <button onclick="closeAlert()" style="
+       width:100%;
+       padding:12px;
+       border-radius:14px;
+       border:none;
+       background:linear-gradient(
+         180deg,
+         rgba(60,120,255,0.92),
+         rgba(40,90,220,0.92)
+       );
+       color:#fff;
+       font-weight:600;
+       box-shadow:
+         0 10px 28px rgba(60,120,255,0.45),
+         inset 0 1px 0 rgba(255,255,255,0.35);
+     ">
+       ตกลง
+     </button>
+   </div>
+ </div>
+
  
 </body>
 </html>
