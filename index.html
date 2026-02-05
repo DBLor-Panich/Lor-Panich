@@ -764,6 +764,8 @@ state.cart.items.push({
 });
 
   console.log('ตะกร้าปัจจุบัน:', state.cart.items);
+
+  renderCart();
 }
 
  function showAlert(message) {
@@ -784,7 +786,66 @@ state.cart.items.push({
    document.getElementById('alert-overlay').style.display = 'none';
    document.getElementById('quantity-overlay')?.removeAttribute('data-lock');
  }
-  
+
+ function renderCart() {
+   const list = document.querySelector('#cart-overlay .cart-list');
+   const summary = document.querySelector('#cart-overlay .cart-summary');
+
+   list.innerHTML = '';
+
+   if (!state.cart.items.length) {
+     list.innerHTML = `
+       <div class="empty" style="color:rgba(255,255,255,0.7);">
+         ยังไม่มีสินค้าในตะกร้า
+       </div>
+     `;
+     summary.innerText = 'รวมยอด: 0 บาท';
+     return;
+   }
+
+   let total = 0;
+
+   state.cart.items.forEach((item, index) => {
+     const subtotal = item.ราคาทุน * item.จำนวน;
+     total += subtotal;
+
+     const el = document.createElement('div');
+     el.className = 'cart-item glass';
+     el.innerHTML = `
+       <div class="cart-item-img"></div>
+
+       <div class="cart-item-info">
+         <div class="cart-item-name">${item.ชื่อสินค้า}</div>
+         <div class="cart-item-sku">SKU: ${item['รหัส SKU']}</div>
+
+         <div class="cart-item-row">
+           <div>จำนวน: ${item.จำนวน}</div>
+           <div>ทุน ${item.ราคาทุน} บาท</div>
+         </div>
+
+         <div class="cart-item-row" style="justify-content:flex-end;">
+           <div class="cart-item-remove" data-index="${index}">
+             ลบ
+           </div>
+         </div>
+       </div>
+     `;
+
+     list.appendChild(el);
+   });
+
+   summary.innerText = `รวมยอด: ${total} บาท`;
+
+   // bind remove
+   list.querySelectorAll('.cart-item-remove').forEach(btn => {
+     btn.onclick = () => {
+       const i = Number(btn.dataset.index);
+       state.cart.items.splice(i, 1);
+       renderCart();
+     };
+   });
+ }
+ 
  </script>
  
 <!-- VIEWER FLOW -->
