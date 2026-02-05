@@ -818,10 +818,27 @@ state.cart.items.push({
          <div class="cart-item-name">${item.ชื่อสินค้า}</div>
          <div class="cart-item-sku">SKU: ${item['รหัส SKU']}</div>
 
-         <div class="cart-item-row">
-           <div>จำนวน: ${item.จำนวน}</div>
-           <div>ทุน ${item.ราคาทุน} บาท</div>
-         </div>
+ <div class="cart-item-row">
+   <div>
+     จำนวน:
+     <input
+       type="number"
+       min="1"
+       value="${item.จำนวน}"
+       data-index="${index}"
+       class="cart-qty-input"
+       style="
+         width:56px;
+         margin-left:6px;
+         padding:4px 6px;
+         border-radius:8px;
+         border:none;
+         text-align:center;
+       "
+     />
+   </div>
+   <div>ทุน ${item.ราคาทุน} บาท</div>
+ </div>
 
          <div class="cart-item-row" style="justify-content:flex-end;">
            <div class="cart-item-remove" data-index="${index}">
@@ -844,7 +861,41 @@ state.cart.items.push({
        renderCart();
      };
    });
- }
+ // bind qty change
+ list.querySelectorAll('.cart-qty-input').forEach(input => {
+   input.onchange = () => {
+     const index = Number(input.dataset.index);
+     const newQty = Number(input.value || 0);
+
+     const item = state.cart.items[index];
+     const product = state.products.find(
+       p => p['รหัส SKU'] === item['รหัส SKU']
+     );
+
+     const stock = Number(product?.['จำนวนคงเหลือ'] || 0);
+     const prevQty = item.จำนวน;
+
+     if (newQty < 1) {
+       input.value = prevQty;
+       return;
+     }
+
+     if (newQty > stock) {
+       input.value = prevQty;
+
+       // shake เฉพาะ cart-item นี้
+       const card = input.closest('.cart-item');
+       card.classList.remove('shake');
+       void card.offsetWidth;
+       card.classList.add('shake');
+       return;
+     }
+
+     item.จำนวน = newQty;
+     renderCart();
+   };
+ });
+}
  
  </script>
  
