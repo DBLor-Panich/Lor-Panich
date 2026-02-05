@@ -940,7 +940,7 @@ state.cart.items.push({
 
  function renderCart() {
    const list = document.querySelector('#cart-overlay .cart-list');
-   const summary = document.querySelector('#cart-overlay .cart-summary');
+   const summary = document.getElementById('cart-total');
    const cartBtn = document.getElementById('cart-btn');
    const badge = document.getElementById('cart-badge');
   
@@ -1020,7 +1020,7 @@ if (!state.cart.items.length) {
      list.appendChild(el);
    });
 
-   summary.innerText = `รวมยอด: ${total} บาท`;
+   summary.innerText = `รวมยอด: ${total.toLocaleString()} บาท`;
 
    // bind remove
    list.querySelectorAll('.cart-item-remove').forEach(btn => {
@@ -1073,12 +1073,12 @@ if (!state.cart.items.length) {
    sessionStorage.setItem(
      'order_summary',
      JSON.stringify({
-       items: state.cart.items,
+       items: JSON.parse(JSON.stringify(state.cart.items)),
        createdAt: new Date().toISOString()
      })
    );
 
-   window.location.href = 'summary.html';
+   window.open('summary.html', '_blank');
  }
 
  // 🛒 STEP 7.4 – Open / Close Cart Overlay
