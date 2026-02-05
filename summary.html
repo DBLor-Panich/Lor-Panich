@@ -20,11 +20,17 @@
     margin: 24px auto;
     background: #fff;
     color: #000;
-    padding: 20mm 18mm;
+    padding: 16mm 18mm 18mm;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     page-break-after: always;
+  display: flex;
+  flex-direction: column;
   }
 
+   .order-items {
+     min-height: 160mm;
+   }
+  
   .header {
     text-align: center;
     margin-bottom: 16px;
@@ -75,7 +81,7 @@
   .right  { text-align: right; }
 
   .footer {
-    margin-top: 24px;
+    margin-top: auto;
     display: flex;
     justify-content: space-between;
     font-size: 14px;
@@ -192,7 +198,7 @@ body.exporting #print-bar {
             <div class="right">ราคา</div>
             <div class="right">รวม</div>
           </div>
-          <div class="order-items" style="min-height:180mm;"></div>
+         <div class="order-items"></div>
         </div>
   <div class="footer">
      <div class="total"></div>
