@@ -681,7 +681,7 @@ state.cart.items.push({
    document.getElementById('quantity-overlay')?.setAttribute('data-lock', 'true');
   
    // 🔴 STEP 6.2 – Trigger shake on input
-  const panel = document.querySelector('#quantity-overlay .glass');
+  const panel = document.querySelector('#alert-overlay .glass');
   if (panel) {
     panel.classList.remove('shake');
     void panel.offsetWidth; // force reflow
