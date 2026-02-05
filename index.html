@@ -330,15 +330,15 @@
 
  /* 🔧 STEP 6.2 – Shake Animation (Quantity Error Feedback) */
  @keyframes shake {
-   0%   { transform: translateX(0); }
-   15%  { transform: translateX(-14px); }
-   30%  { transform: translateX(14px); }
-   45%  { transform: translateX(-10px); }
-   60%  { transform: translateX(10px); }
-   75%  { transform: translateX(-6px); }
-   90%  { transform: translateX(6px); }
-   100% { transform: translateX(0); }
- }
+  0%   { transform: translate(-50%, -50%) translateX(0); }
+  15%  { transform: translate(-50%, -50%) translateX(-14px); }
+  30%  { transform: translate(-50%, -50%) translateX(14px); }
+  45%  { transform: translate(-50%, -50%) translateX(-10px); }
+  60%  { transform: translate(-50%, -50%) translateX(10px); }
+  75%  { transform: translate(-50%, -50%) translateX(-6px); }
+  90%  { transform: translate(-50%, -50%) translateX(6px); }
+  100% { transform: translate(-50%, -50%) translateX(0); }
+}
 
  .shake {
    animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
