@@ -379,7 +379,8 @@
 
 /* 🛒 STEP 7.1 – Cart Overlay */
 #cart-overlay {
-  display:none;
+  display:block;
+  pointer-events:none;
   position:fixed;
   inset:0;
   z-index:90;
@@ -404,6 +405,7 @@
 /* 🛒 Cart Open State */
 #cart-overlay.is-open {
   opacity:1;
+  pointer-events:auto;
 }
 
 #cart-overlay.is-open .cart-sheet {
