@@ -760,7 +760,8 @@ state.cart.items.push({
   'รหัส SKU': product['รหัส SKU'],
   ชื่อสินค้า: product['ชื่อสินค้า'],
   ราคาทุน: product['ราคาทุน'],
-  จำนวน: qty
+  จำนวน: qty,
+  รูปสินค้า: product['รูปสินค้า'] || ''
 });
 
   console.log('ตะกร้าปัจจุบัน:', state.cart.items);
@@ -796,6 +797,7 @@ state.cart.items.push({
 
    if (!state.cart.items.length) {
      if (cartBtn) cartBtn.style.display = 'none';
+     closeCart();
      list.innerHTML = `
        <div class="empty" style="color:rgba(255,255,255,0.7);">
          ยังไม่มีสินค้าในตะกร้า
@@ -816,7 +818,9 @@ state.cart.items.push({
      const el = document.createElement('div');
      el.className = 'cart-item glass';
      el.innerHTML = `
-       <div class="cart-item-img"></div>
+       <div class="cart-item-img">
+        ${item.รูปสินค้า ? `<img src="${item.รูปสินค้า}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : ''}
+       </div>
 
        <div class="cart-item-info">
          <div class="cart-item-name">${item.ชื่อสินค้า}</div>
