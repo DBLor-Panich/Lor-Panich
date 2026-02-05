@@ -1106,13 +1106,28 @@ if (!state.cart.items.length) {
      'order_summary',
      JSON.stringify({
        items: JSON.parse(JSON.stringify(state.cart.items)),
-       createdAt: new Date().toISOString()
+       createdAt: new Date().toISOString(),
+       status: 'submitted'
      })
    );
 
    window.open('summary.html', '_blank');
+  
+showOrderSuccess();
  }
 
+ function showOrderSuccess() {
+  document.getElementById('order-success-overlay').style.display = 'block';
+}
+
+function closeOrderSuccess() {
+  state.cart.items = [];
+  renderCart();
+ 
+  document.getElementById('order-success-overlay').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+ 
  // 🛒 STEP 7.4 – Open / Close Cart Overlay
  function openCart() {
    if (!state.cart.items.length) return;
@@ -1568,5 +1583,65 @@ box-shadow:
 
 </div>
 
+<!-- ✅ ORDER SUCCESS OVERLAY -->
+<div id="order-success-overlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:120;
+  background:rgba(0,0,0,0.35);
+">
+  <div class="glass" style="
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:90%;
+    max-width:360px;
+    padding:22px;
+    text-align:center;
+  ">
+    <div style="
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:10px;
+      color:#ffffff;
+      text-shadow:0 1px 4px rgba(0,0,0,0.4);
+    ">
+      ✅ สั่งสินค้าสำเร็จ
+    </div>
+
+    <div style="
+      font-size:14px;
+      color:#ffffff;
+      opacity:0.9;
+      margin-bottom:18px;
+      text-shadow:0 1px 4px rgba(0,0,0,0.35);
+    ">
+      ออเดอร์ถูกส่งไปยังแอดมินแล้ว<br>
+      กรุณารอการยืนยัน
+    </div>
+
+    <button
+      onclick="closeOrderSuccess()"
+      style="
+        width:100%;
+        padding:12px;
+        border-radius:14px;
+        border:none;
+        font-weight:600;
+        background:linear-gradient(
+          180deg,
+          rgba(60,120,255,0.92),
+          rgba(40,90,220,0.92)
+        );
+        color:#fff;
+      "
+    >
+      กลับหน้าหลัก
+    </button>
+  </div>
+</div>
+ 
 </body>
 </html>
