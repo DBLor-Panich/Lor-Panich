@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>สรุปรายการสั่งซื้อ – Lor-Panich</title>
@@ -85,17 +86,23 @@
   }
 
   @media print {
-    body {
-      background: none;
-    }
-    .a4-page {
-      margin: 0;
-      box-shadow: none;
-    }
-     #print-bar {
-     display: none;
-   }
+  body {
+    background: none;
   }
+  .a4-page {
+    margin: 0;
+    box-shadow: none;
+  }
+  #print-bar {
+    display: none;
+  }
+}
+
+/* 🔴 STEP 9.3 — Hide controls during PNG export */
+body.exporting #print-bar {
+  display: none;
+}
+
 </style>
 </head>
 
@@ -108,6 +115,17 @@
    background:#e5e5e5;
    text-align:right;
  ">
+   <button id="btn-export" style="
+     padding:10px 16px;
+     font-size:14px;
+     font-weight:600;
+     border-radius:10px;
+     border:none;
+     cursor:pointer;
+     margin-right:8px;
+   ">
+     🖼 บันทึกเป็นรูป
+   </button>
    <button id="btn-print" style="
     padding:10px 16px;
      font-size:14px;
@@ -238,6 +256,31 @@
      window.print();
    };
  }
+
+ // STEP 9.3 — Export PNG
+ const exportBtn = document.getElementById('btn-export');
+ if (exportBtn) {
+   exportBtn.onclick = async () => {
+     document.body.classList.add('exporting');
+
+     const pages = document.querySelectorAll('.a4-page');
+
+     for (let i = 0; i < pages.length; i++) {
+       const canvas = await html2canvas(pages[i], {
+         scale: 2,
+         useCORS: true
+       });
+
+       const link = document.createElement('a');
+       link.download = `order-summary-page-${i + 1}.png`;
+       link.href = canvas.toDataURL('image/png');
+       link.click();
+     }
+
+     document.body.classList.remove('exporting');
+   };
+ }
+
 </script>
   
 </body>
