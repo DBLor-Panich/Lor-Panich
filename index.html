@@ -408,6 +408,7 @@
 
 /* 🛒 Cart Open State */
 #cart-overlay.is-open {
+  display:block;
   opacity:1;
   pointer-events:auto;
 }
@@ -639,10 +640,12 @@
   inset: 0;
   z-index: 95;
   background: rgba(0,0,0,0.35);
+  pointer-events: none;
 }
 
 #menu-overlay.is-open {
   display: block;
+  pointer-events: auto;
 }
 
 .menu-sheet {
@@ -1320,14 +1323,13 @@ function hideLoading() {
 
  <!-- GLOBAL LOADING OVERLAY -->
  <div id="loading-overlay" style="
-   display:none;
-   position:fixed;
+      display:none;
+      position:fixed;
    inset:0;
    z-index:100;
    background:rgba(255,255,255,0.15);
    backdrop-filter: blur(6px);
    -webkit-backdrop-filter: blur(6px);
-   display:flex;
    align-items:center;
    justify-content:center;
  ">
@@ -1735,41 +1737,40 @@ box-shadow:
     </button>
   </div>
 </div>
+ <!-- ☰ HAMBURGER MENU OVERLAY -->
+ <div id="menu-overlay">
+   <div class="glass menu-sheet">
 
-<!-- ☰ HAMBURGER MENU OVERLAY -->
-<div id="menu-overlay">
-  <div class="glass menu-sheet">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+       <div style="font-size:16px;font-weight:700;color:#fff;">
+         เมนู
+       </div>
+       <button
+         onclick="closeMenu()"
+         style="background:none;border:none;font-size:18px;color:#fff;"
+       >✕</button>
+     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-size:16px;font-weight:700;color:#fff;">
-        เมนู
-      </div>
-      <button
-        onclick="closeMenu()"
-        style="background:none;border:none;font-size:18px;color:#fff;"
-      >✕</button>
-    </div>
+     <div class="menu-item" onclick="onAdminLogin()">
+       🔐 เข้าสู่ระบบ (Admin)
+     </div>
 
-    <div class="menu-item" onclick="onAdminLogin()">
-      🔐 เข้าสู่ระบบ (Admin)
-    </div>
+     <div class="menu-item" onclick="onSearch()">
+       🔍 ค้นหาสินค้า
+     </div>
 
-    <div class="menu-item" onclick="onSearch()">
-      🔍 ค้นหาสินค้า
-    </div>
+     <div class="menu-item" onclick="onFilter()">
+       🗂 ตัวกรองสินค้า
+     </div>
 
-    <div class="menu-item" onclick="onFilter()">
-      🗂 ตัวกรองสินค้า
-    </div>
+     <div class="menu-divider"></div>
 
-    <div class="menu-divider"></div>
+     <div class="menu-item" onclick="goHome()">
+       🏠 กลับหน้าหลัก
+     </div>
 
-    <div class="menu-item" onclick="goHome()">
-      🏠 กลับหน้าหลัก
-    </div>
-
-  </div>
-</div>
-
+   </div>
+ </div>
+ 
 </body>
 </html>
