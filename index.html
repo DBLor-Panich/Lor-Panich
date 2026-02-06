@@ -777,7 +777,7 @@ body.menu-open .product-card.glass {
     guard() {
       if (!this.isLoggedIn()) {
         openAdminLogin();
-        return false;
+        return false; // ⛔ stop admin flow here
       }
       return true;
     }
@@ -786,7 +786,8 @@ body.menu-open .product-card.glass {
 
  <script>
 function openAdminLogin() {
-  // STEP A2 จะ implement ตรงนี้
+  if (document.body.classList.contains('admin-opening')) return;
+  document.body.classList.add('admin-opening');
   console.log('openAdminLogin');
 }
 </script>
@@ -1852,12 +1853,14 @@ box-shadow:
 
  <!-- ☰ MENU BACKDROP BIND (ARCH SAFE) -->
  <script>
+ window.addEventListener('DOMContentLoaded', () => {
    document.getElementById('menu-overlay')
      ?.addEventListener('click', (e) => {
        if (e.target.id === 'menu-overlay') {
          closeMenu();
        }
      });
+ });
  </script>
 
  
