@@ -1138,31 +1138,31 @@ function reject(orderId) {
 <script>
   const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
 
-  async function ดึงรายการสินค้า() {
-    const url = `${API_BASE}?action=ดึงรายการสินค้า`;
-  let res;
-  try {
-    res = await fetch(url);
-  } catch (e) {
-    throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-  }
+ return new Promise((resolve, reject) => {
+   const callbackName = 'productCallback_' + Date.now();
 
-  if (!res.ok) {
-    throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด');
-  }
+   window[callbackName] = function (data) {
+     delete window[callbackName];
+     document.body.removeChild(script);
 
-  let data;
-  try {
-    data = await res.json();
-  } catch (e) {
-    throw new Error('ข้อมูลที่ได้ไม่ถูกต้อง');
-  }
+     if (data.สถานะ !== 'สำเร็จ') {
+       reject(new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้'));
+       return;
+     }
 
-    if (data.สถานะ !== 'สำเร็จ') {
-      throw new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้');
-    }
-    return data.ข้อมูล.รายการสินค้า;
-  }
+     resolve(data.ข้อมูล.รายการสินค้า);
+   };
+
+   const script = document.createElement('script');
+   script.src =
+     `${API_BASE}?action=ดึงรายการสินค้า&callback=${callbackName}`;
+
+   script.onerror = () => {
+     reject(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
+   };
+
+   document.body.appendChild(script);
+ });
 </script>
 
 <!-- RENDER FUNCTIONS -->
