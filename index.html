@@ -759,9 +759,42 @@ body.menu-open .product-card.glass {
     selectedProduct: null,
     cart: {
       items: []
+    },
+  admin: {
+    loggedIn: false,
+    user: null
     }
   };
 </script>
+
+  </script>
+
+<!-- 🔒 ADMIN GUARD (ARCH PREPARE) -->
+<script>
+  const Admin = {
+    isLoggedIn() {
+      return state.admin.loggedIn === true;
+    },
+
+    guard() {
+      if (!this.isLoggedIn()) {
+        openAdminLogin();
+        return false;
+      }
+      return true;
+    }
+  };
+</script>
+
+function hydrateAdminState() {
+  const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+  if (loggedIn) {
+    state.admin.loggedIn = true;
+    try {
+      state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
+    } catch {}
+  }
+}
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
@@ -1299,7 +1332,7 @@ function closeMenu() {
 // 🔒 Placeholder actions (ยังไม่ implement)
 function onAdminLogin() {
   closeMenu();
-  console.log('Admin Login');
+  openAdminLogin(); // 🔒 hook สำหรับ STEP ถัดไป
 }
 
 function onSearch() {
@@ -1367,7 +1400,11 @@ function hideLoading() {
     }
   }
 
-  window.addEventListener('DOMContentLoaded', initApp);
+ window.addEventListener('DOMContentLoaded', () => {
+   hydrateAdminState();
+   initApp();
+ });
+ 
 </script>
   
  <!-- VIEWER FLOW : PRODUCT DETAIL -->
