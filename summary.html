@@ -159,12 +159,14 @@ body.exporting #print-bar {
 <div id="pages-root"></div>
   
 <script>
-  const raw = sessionStorage.getItem('order_summary');
-  if (!raw) {
-    alert('ไม่พบข้อมูลคำสั่งซื้อ');
-  } else {
-    const data = JSON.parse(raw);
-    const items = data.items || [];
+// 🔗 STEP S5: Summary อ่าน Order จาก OrderStore
+const orders = OrderStore.list();
+const data = orders[0]; // ล่าสุด (newest first)
+
+if (!data) {
+  alert('ไม่พบข้อมูลคำสั่งซื้อ');
+} else {
+  const items = data.items || [];
 
  // STEP 8.5 — Auto-fill document meta
  const createdAt = data.createdAt
