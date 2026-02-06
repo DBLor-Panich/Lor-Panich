@@ -1045,9 +1045,11 @@ async function submitAdminLogin() {
   </div>
 </div>
 
- <script>
+<script>
 /* ======================================================
    🛡️ ADMIN UI (B1) — Pending Orders
+   - Guard เฉพาะตอนเปิด
+   - ปลอดภัยถ้า DOM ยังไม่พร้อม
 ====================================================== */
 
 const AdminUI = (() => {
@@ -1056,25 +1058,34 @@ const AdminUI = (() => {
 
   function open() {
     if (!Admin.guard()) return;
+
+    const root = el();
+    if (!root) return;
+
     render();
-    el().style.display = 'block';
+    root.style.display = 'block';
   }
 
   function close() {
-    el().style.display = 'none';
+    const root = el();
+    if (root) root.style.display = 'none';
   }
 
   function render() {
+    const list = listEl();
+    if (!list) return;
+
     const orders = OrderStore
       .list()
       .filter(o => o.status === 'pending');
 
     if (!orders.length) {
-      listEl().innerHTML = `<div style="color:#666">ไม่มี Order ที่รอดำเนินการ</div>`;
+      list.innerHTML =
+        `<div style="color:#666">ไม่มี Order ที่รอดำเนินการ</div>`;
       return;
     }
 
-    listEl().innerHTML = orders.map(o => {
+    list.innerHTML = orders.map(o => {
       const total = o.items.reduce(
         (sum, i) => sum + (i.ราคาทุน * i.จำนวน), 0
       );
@@ -1082,13 +1093,17 @@ const AdminUI = (() => {
       const date = new Date(o.createdAt).toLocaleString('th-TH');
 
       return `
-        <div style="
-          border:1px solid #eee;
-          border-radius:12px;
-          padding:12px 14px;
-          margin-bottom:12px;
-          cursor:pointer;
-        " onclick="AdminUI.view('${o.orderId}')">
+        <div
+          style="
+            border:1px solid #eee;
+            border-radius:12px;
+            padding:12px 14px;
+            margin-bottom:12px;
+            cursor:pointer;
+          "
+          data-order-id="${o.orderId}"
+          class="admin-order-row"
+        >
           <div style="font-weight:700">${o.orderId}</div>
           <div style="font-size:13px;color:#555">${date}</div>
           <div style="margin-top:6px;font-size:14px">
@@ -1097,42 +1112,50 @@ const AdminUI = (() => {
         </div>
       `;
     }).join('');
+
+    // bind click (ไม่ใช้ inline onclick)
+    list.querySelectorAll('.admin-order-row').forEach(row => {
+      row.onclick = () => view(row.dataset.orderId);
+    });
   }
 
-function view(orderId) {
-  const order = OrderStore.get(orderId);
-  if (!order) return;
+  function view(orderId) {
+    const order = OrderStore.get(orderId);
+    if (!order) return;
 
-  const ok = confirm(
-    `Order: ${order.orderId}\n` +
-    `รายการ: ${order.items.length}\n\n` +
-    `กด OK = อนุมัติ\nCancel = ปฏิเสธ`
-  );
+    const ok = confirm(
+      `Order: ${order.orderId}\n` +
+      `รายการ: ${order.items.length}\n\n` +
+      `กด OK = อนุมัติ\nCancel = ปฏิเสธ`
+    );
 
-  if (ok) {
-    approve(orderId);
-  } else {
-    reject(orderId);
+    if (ok) {
+      approve(orderId);
+    } else {
+      reject(orderId);
+    }
   }
-}
 
- function approve(orderId) {
-  OrderStore.update(orderId, {
-    status: 'approved'
-  });
-  render(); // refresh list
-}
+  function approve(orderId) {
+    OrderStore.update(orderId, { status: 'approved' });
+    render();
+  }
 
-function reject(orderId) {
-  OrderStore.update(orderId, {
-    status: 'rejected'
-  });
-  render(); // refresh list
-}
+  function reject(orderId) {
+    OrderStore.update(orderId, { status: 'rejected' });
+    render();
+  }
 
-  return { open, close, render, view };
+  // expose public API
+  return {
+    open,
+    close,
+    render,
+    view
+  };
 })();
 </script>
+
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
