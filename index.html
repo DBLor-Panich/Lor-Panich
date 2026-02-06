@@ -1136,34 +1136,39 @@ function reject(orderId) {
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
- 
- function fetchProductsJSONP() {
- return new Promise((resolve, reject) => {
-   const callbackName = 'productCallback_' + Date.now();
+  const API_BASE =
+    'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
 
-   window[callbackName] = function (data) {
-     delete window[callbackName];
-     document.body.removeChild(script);
+  function fetchProductsJSONP() {
+    return new Promise((resolve, reject) => {
+      const callbackName = 'productCallback_' + Date.now();
 
-     if (data.สถานะ !== 'สำเร็จ') {
-       reject(new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้'));
-       return;
-     }
+      const script = document.createElement('script');
 
-     resolve(data.ข้อมูล.รายการสินค้า);
-   };
+      window[callbackName] = function (data) {
+        delete window[callbackName];
+        document.body.removeChild(script);
 
-   const script = document.createElement('script');
-   script.src =
-     `${API_BASE}?action=ดึงรายการสินค้า&callback=${callbackName}`;
+        if (data.สถานะ !== 'สำเร็จ') {
+          reject(new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้'));
+          return;
+        }
 
-   script.onerror = () => {
-     reject(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
-   };
+        resolve(data.ข้อมูล.รายการสินค้า);
+      };
 
-   document.body.appendChild(script);
- });
+      script.src =
+        `${API_BASE}?action=ดึงรายการสินค้า&callback=${callbackName}`;
+
+      script.onerror = () => {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        reject(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
+      };
+
+      document.body.appendChild(script);
+    });
+  }
 </script>
 
 <!-- RENDER FUNCTIONS -->
