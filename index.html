@@ -327,6 +327,12 @@
 #product-detail-overlay.is-open .glass {
   transform: translateY(0);
 }
+ 
+body.menu-open .product-card.glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 
  /* 🔧 STEP 6.2 – Shake Animation (Quantity Error Feedback) */
  @keyframes shake {
@@ -1268,11 +1274,13 @@ function closeOrderSuccess() {
 function openMenu() {
   const el = document.getElementById('menu-overlay');
   el.classList.add('is-open');
+  document.body.classList.add('menu-open');
 }
 
 function closeMenu() {
   const el = document.getElementById('menu-overlay');
   el.classList.remove('is-open');
+  document.body.classList.remove('menu-open');
 }
 
   
