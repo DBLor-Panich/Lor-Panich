@@ -788,8 +788,40 @@ body.menu-open .product-card.glass {
 function openAdminLogin() {
   if (document.body.classList.contains('admin-opening')) return;
   document.body.classList.add('admin-opening');
-  console.log('openAdminLogin');
+  const el = document.getElementById('admin-login-overlay');
+  if (el) el.style.display = 'block';
 }
+
+function closeAdminLogin() {
+  const el = document.getElementById('admin-login-overlay');
+  if (el) el.style.display = 'none';
+  document.body.classList.remove('admin-opening');
+}
+
+function submitAdminLogin() {
+  const user = document.getElementById('admin-user').value;
+  const pass = document.getElementById('admin-pass').value;
+
+  if (!user || !pass) {
+    alert('กรุณากรอกข้อมูลให้ครบ');
+    return;
+  }
+
+  // 🔒 STEP A2: mock credential
+  if (user === 'admin' && pass === '1234') {
+    sessionStorage.setItem('admin_logged_in', 'true');
+    sessionStorage.setItem('admin_user', JSON.stringify({ user }));
+
+    state.admin.loggedIn = true;
+    state.admin.user = { user };
+
+    closeAdminLogin();
+    alert('เข้าสู่ระบบสำเร็จ');
+  } else {
+    alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
+}
+
 </script>
 
  <script>
@@ -1378,8 +1410,83 @@ function goHome() {
   <div id="product-list"></div>
 </main>
 
-<!-- ADMIN FLOW -->
-<!-- (ยังไม่เริ่มใน STEP นี้) -->
+ <!-- ADMIN FLOW -->
+ <!-- (ยังไม่เริ่มใน STEP นี้) -->
+<!-- 🔐 STEP A2 – ADMIN LOGIN OVERLAY -->
+<div id="admin-login-overlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:110;
+  background:rgba(0,0,0,0.35);
+">
+  <div class="glass" style="
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:90%;
+    max-width:360px;
+    padding:22px;
+  ">
+
+    <div style="
+      font-size:17px;
+      font-weight:700;
+      margin-bottom:14px;
+      color:#ffffff;
+      text-shadow:0 1px 4px rgba(0,0,0,0.35);
+    ">
+      🔐 Admin Login
+    </div>
+
+    <input
+      id="admin-user"
+      placeholder="Username"
+      style="
+        width:100%;
+        padding:12px;
+        margin-bottom:10px;
+        border-radius:12px;
+        border:none;
+      "
+    />
+
+    <input
+      id="admin-pass"
+      type="password"
+      placeholder="Password"
+      style="
+        width:100%;
+        padding:12px;
+        margin-bottom:16px;
+        border-radius:12px;
+        border:none;
+      "
+    />
+
+    <button
+      onclick="submitAdminLogin()"
+      style="
+        width:100%;
+        padding:12px;
+        border-radius:14px;
+        border:none;
+        font-weight:600;
+        background:linear-gradient(
+          180deg,
+          rgba(60,120,255,0.92),
+          rgba(40,90,220,0.92)
+        );
+        color:#fff;
+      "
+    >
+      เข้าสู่ระบบ
+    </button>
+
+  </div>
+</div>
+
 
  <script>
 // 🔴 ADD: Ensure loading helpers exist before initApp
