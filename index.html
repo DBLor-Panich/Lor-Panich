@@ -1383,21 +1383,14 @@ if (!state.cart.items.length) {
 function goToSummary() {
   if (!state.cart.items.length) return;
 
-  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
-  const order = OrderStore.create({
+  // ✅ Order ถูกเก็บถาวรใน OrderStore (localStorage)
+  OrderStore.create({
     items: JSON.parse(JSON.stringify(state.cart.items))
   });
-
-  // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
-  sessionStorage.setItem(
-    'order_summary',
-    JSON.stringify(order)
-  );
 
   window.open('summary.html', '_blank');
   showOrderSuccess();
 }
-
 
  function showOrderSuccess() {
   document.getElementById('order-success-overlay').style.display = 'block';
