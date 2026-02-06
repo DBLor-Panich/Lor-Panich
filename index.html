@@ -861,14 +861,37 @@ const OrderStore = (() => {
     },
 
     guard() {
+      const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
+
+      // ⏱️ Session expired → silent logout
+      if (expireAt && Date.now() > expireAt) {
+        this.logout(true);
+      }
+
       if (!this.isLoggedIn()) {
         openAdminLogin();
-        return false; // ⛔ stop admin flow here
+        return false;
       }
       return true;
+    },
+
+    logout(silent = false) {
+      // 🧹 Clear session storage
+      sessionStorage.removeItem('admin_logged_in');
+      sessionStorage.removeItem('admin_user');
+      sessionStorage.removeItem('admin_expire_at');
+
+      // 🔄 Reset state
+      state.admin.loggedIn = false;
+      state.admin.user = null;
+
+      if (!silent) {
+        alert('ออกจากระบบแล้ว');
+      }
     }
   };
 </script>
+
 
  <script>
 function openAdminLogin() {
@@ -904,11 +927,13 @@ async function submitAdminLogin() {
       return;
     }
 
-    sessionStorage.setItem('admin_logged_in', 'true');
-    sessionStorage.setItem('admin_user', JSON.stringify(data.ข้อมูล));
+ sessionStorage.setItem('admin_logged_in', 'true');
+ sessionStorage.setItem('admin_user', JSON.stringify(data.ข้อมูล));
+ // ⏱️ session expire: 8 ชั่วโมง
+ sessionStorage.setItem('admin_expire_at', String(Date.now() + 8 * 60 * 60 * 1000));
 
-    state.admin.loggedIn = true;
-    state.admin.user = data.ข้อมูล;
+ state.admin.loggedIn = true;
+ state.admin.user = data.ข้อมูล;
 
     closeAdminLogin();
     alert('เข้าสู่ระบบสำเร็จ');
@@ -930,6 +955,11 @@ async function submitAdminLogin() {
  <script>
  function hydrateAdminState() {
    const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+   const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
+if (expireAt && Date.now() > expireAt) {
+  sessionStorage.clear();
+  return;
+}
    if (loggedIn) {
      state.admin.loggedIn = true;
      try {
@@ -972,8 +1002,34 @@ async function submitAdminLogin() {
       align-items:center;
     ">
       <span>🛡️ Admin · Order Pending</span>
-      <button onclick="AdminUI.close()" style="border:none;background:none;cursor:pointer;font-size:18px;">✕</button>
-    </div>
+
+<div style="display:flex;align-items:center;gap:8px;">
+  <button
+    onclick="Admin.logout()"
+    style="
+      border:none;
+      background:none;
+      cursor:pointer;
+      font-size:13px;
+      color:#c0392b;
+    "
+  >
+    ออกจากระบบ
+  </button>
+
+  <button
+    onclick="AdminUI.close()"
+    style="
+      border:none;
+      background:none;
+      cursor:pointer;
+      font-size:18px;
+    "
+  >
+    ✕
+  </button>
+</div>
+
 
     <div id="admin-order-list" style="
       padding:16px;
