@@ -638,14 +638,18 @@
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 95;
+  z-index: 9999;                 /* 🔒 Top-most layer */
+  isolation: isolate;            /* 🧠 แยก stacking context */
   background: rgba(0,0,0,0.35);
   pointer-events: none;
+ opacity: 0;
+ transition: opacity 0.22s ease-out;
 }
 
 #menu-overlay.is-open {
   display: block;
   pointer-events: auto;
+  opacity: 1;
 }
 
 .menu-sheet {
@@ -698,6 +702,43 @@
 </head>
 
 <body>
+
+ <!-- ☰ GLOBAL MENU ROOT (ARCH FIX) -->
+ <div id="menu-root">
+   <div id="menu-overlay">
+     <div class="menu-sheet">
+         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+           <div style="font-size:16px;font-weight:700;color:#fff;">
+             เมนู
+           </div>
+           <button
+             onclick="closeMenu()"
+             style="background:none;border:none;font-size:18px;color:#fff;"
+             aria-label="ปิดเมนู"
+           >✕</button>
+         </div>
+
+         <div class="menu-item" onclick="onAdminLogin()">
+           🔐 เข้าสู่ระบบ (Admin)
+         </div>
+       
+         <div class="menu-item" onclick="onSearch()">
+           🔍 ค้นหาสินค้า
+         </div>
+
+         <div class="menu-item" onclick="onFilter()">
+           🗂 ตัวกรองสินค้า
+         </div>
+
+         <div class="menu-divider"></div>
+    
+         <div class="menu-item" onclick="goHome()">
+           🏠 กลับหน้าหลัก
+         </div>
+     </div>
+   </div>
+ </div>
+
 
 <!-- GLOBAL STATE -->
 <script>
@@ -1234,6 +1275,7 @@ function closeMenu() {
   el.classList.remove('is-open');
 }
 
+  
 // 🔒 Placeholder actions (ยังไม่ implement)
 function onAdminLogin() {
   closeMenu();
@@ -1743,40 +1785,17 @@ box-shadow:
     </button>
   </div>
 </div>
- <!-- ☰ HAMBURGER MENU OVERLAY -->
- <div id="menu-overlay">
-   <div class="glass menu-sheet">
 
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-       <div style="font-size:16px;font-weight:700;color:#fff;">
-         เมนู
-       </div>
-       <button
-         onclick="closeMenu()"
-         style="background:none;border:none;font-size:18px;color:#fff;"
-       >✕</button>
-     </div>
+ <!-- ☰ MENU BACKDROP BIND (ARCH SAFE) -->
+ <script>
+   document.getElementById('menu-overlay')
+     ?.addEventListener('click', (e) => {
+       if (e.target.id === 'menu-overlay') {
+         closeMenu();
+       }
+     });
+ </script>
 
-     <div class="menu-item" onclick="onAdminLogin()">
-       🔐 เข้าสู่ระบบ (Admin)
-     </div>
-
-     <div class="menu-item" onclick="onSearch()">
-       🔍 ค้นหาสินค้า
-     </div>
-
-     <div class="menu-item" onclick="onFilter()">
-       🗂 ตัวกรองสินค้า
-     </div>
-
-     <div class="menu-divider"></div>
-
-     <div class="menu-item" onclick="goHome()">
-       🏠 กลับหน้าหลัก
-     </div>
-
-   </div>
- </div>
  
 </body>
 </html>
