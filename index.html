@@ -893,37 +893,35 @@ async function submitAdminLogin() {
     return;
   }
 
-  const url =
+  const callbackName = 'adminLoginCallback_' + Date.now();
+
+  window[callbackName] = function (data) {
+    delete window[callbackName];
+    document.body.removeChild(script);
+
+    if (data.สถานะ !== 'สำเร็จ') {
+      alert(data.ข้อความ || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      return;
+    }
+
+    sessionStorage.setItem('admin_logged_in', 'true');
+    sessionStorage.setItem('admin_user', JSON.stringify(data.ข้อมูล));
+
+    state.admin.loggedIn = true;
+    state.admin.user = data.ข้อมูล;
+
+    closeAdminLogin();
+    alert('เข้าสู่ระบบสำเร็จ');
+  };
+
+  const script = document.createElement('script');
+  script.src =
     `${API_BASE}?action=adminLogin` +
     `&username=${encodeURIComponent(user)}` +
-    `&password=${encodeURIComponent(pass)}`;
+    `&password=${encodeURIComponent(pass)}` +
+    `&callback=${callbackName}`;
 
-  let data;
-  try {
-    const res = await fetch(url);
-    data = await res.json();
-  } catch (err) {
-    alert('ไม่สามารถเชื่อมต่อระบบล็อกอินได้');
-    return;
-  }
-
-  if (data.สถานะ !== 'สำเร็จ') {
-    alert(data.ข้อความ || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-    return;
-  }
-
-  // ✅ LOGIN SUCCESS
-  sessionStorage.setItem('admin_logged_in', 'true');
-  sessionStorage.setItem(
-    'admin_user',
-    JSON.stringify(data.ข้อมูล)
-  );
-
-  state.admin.loggedIn = true;
-  state.admin.user = data.ข้อมูล;
-
-  closeAdminLogin();
-  alert('เข้าสู่ระบบสำเร็จ');
+  document.body.appendChild(script);
 }
 
 
