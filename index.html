@@ -1380,20 +1380,24 @@ if (!state.cart.items.length) {
  });
 }
 
- function goToSummary() {
+function goToSummary() {
   if (!state.cart.items.length) return;
 
-  // 🔴 STEP S2: Viewer ส่งออกเฉพาะ items เท่านั้น
+  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
+  const order = OrderStore.create({
+    items: JSON.parse(JSON.stringify(state.cart.items))
+  });
+
+  // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
   sessionStorage.setItem(
-    'order_draft',
-    JSON.stringify({
-      items: JSON.parse(JSON.stringify(state.cart.items))
-    })
+    'order_summary',
+    JSON.stringify(order)
   );
 
   window.open('summary.html', '_blank');
   showOrderSuccess();
 }
+
 
  function showOrderSuccess() {
   document.getElementById('order-success-overlay').style.display = 'block';
