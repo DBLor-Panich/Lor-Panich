@@ -1022,12 +1022,36 @@ const AdminUI = (() => {
     }).join('');
   }
 
-  function view(orderId) {
-    const order = OrderStore.get(orderId);
-    if (!order) return;
-    alert(`VIEW ONLY\n${order.orderId}\n(${order.items.length} items)`);
-    // B2 จะเปลี่ยนเป็น detail panel
+function view(orderId) {
+  const order = OrderStore.get(orderId);
+  if (!order) return;
+
+  const ok = confirm(
+    `Order: ${order.orderId}\n` +
+    `รายการ: ${order.items.length}\n\n` +
+    `กด OK = อนุมัติ\nCancel = ปฏิเสธ`
+  );
+
+  if (ok) {
+    approve(orderId);
+  } else {
+    reject(orderId);
   }
+}
+
+ function approve(orderId) {
+  OrderStore.update(orderId, {
+    status: 'approved'
+  });
+  render(); // refresh list
+}
+
+function reject(orderId) {
+  OrderStore.update(orderId, {
+    status: 'rejected'
+  });
+  render(); // refresh list
+}
 
   return { open, close, render, view };
 })();
