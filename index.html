@@ -853,6 +853,7 @@ const OrderStore = (() => {
 
 
 <!-- 🔒 ADMIN GUARD (ARCH PREPARE) -->
+ 
 <script>
   const Admin = {
     isLoggedIn() {
@@ -920,6 +921,117 @@ function submitAdminLogin() {
    }
  }
  </script>
+
+ <!-- ===============================
+     🛡️ ADMIN DASHBOARD (B1)
+================================= -->
+<div id="admin-dashboard" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:120;
+">
+  <div style="
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(920px, 92vw);
+    max-height:80vh;
+    background:#fff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+  ">
+    <div style="
+      padding:16px 20px;
+      border-bottom:1px solid #eee;
+      font-weight:700;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    ">
+      <span>🛡️ Admin · Order Pending</span>
+      <button onclick="AdminUI.close()" style="border:none;background:none;cursor:pointer;font-size:18px;">✕</button>
+    </div>
+
+    <div id="admin-order-list" style="
+      padding:16px;
+      overflow:auto;
+      flex:1;
+    ">
+      <!-- rows injected -->
+    </div>
+  </div>
+</div>
+
+ <script>
+/* ======================================================
+   🛡️ ADMIN UI (B1) — Pending Orders
+====================================================== */
+
+const AdminUI = (() => {
+  const el = () => document.getElementById('admin-dashboard');
+  const listEl = () => document.getElementById('admin-order-list');
+
+  function open() {
+    if (!Admin.guard()) return;
+    render();
+    el().style.display = 'block';
+  }
+
+  function close() {
+    el().style.display = 'none';
+  }
+
+  function render() {
+    const orders = OrderStore
+      .list()
+      .filter(o => o.status === 'pending');
+
+    if (!orders.length) {
+      listEl().innerHTML = `<div style="color:#666">ไม่มี Order ที่รอดำเนินการ</div>`;
+      return;
+    }
+
+    listEl().innerHTML = orders.map(o => {
+      const total = o.items.reduce(
+        (sum, i) => sum + (i.ราคาทุน * i.จำนวน), 0
+      );
+
+      const date = new Date(o.createdAt).toLocaleString('th-TH');
+
+      return `
+        <div style="
+          border:1px solid #eee;
+          border-radius:12px;
+          padding:12px 14px;
+          margin-bottom:12px;
+          cursor:pointer;
+        " onclick="AdminUI.view('${o.orderId}')">
+          <div style="font-weight:700">${o.orderId}</div>
+          <div style="font-size:13px;color:#555">${date}</div>
+          <div style="margin-top:6px;font-size:14px">
+            ${o.items.length} รายการ · รวม ${total.toLocaleString()} บาท
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function view(orderId) {
+    const order = OrderStore.get(orderId);
+    if (!order) return;
+    alert(`VIEW ONLY\n${order.orderId}\n(${order.items.length} items)`);
+    // B2 จะเปลี่ยนเป็น detail panel
+  }
+
+  return { open, close, render, view };
+})();
+</script>
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
