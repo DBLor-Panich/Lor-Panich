@@ -884,8 +884,8 @@ function closeAdminLogin() {
   document.body.classList.remove('admin-opening');
 }
 
-function submitAdminLogin() {
-  const user = document.getElementById('admin-user').value;
+async function submitAdminLogin() {
+  const user = document.getElementById('admin-user').value.trim();
   const pass = document.getElementById('admin-pass').value;
 
   if (!user || !pass) {
@@ -893,20 +893,39 @@ function submitAdminLogin() {
     return;
   }
 
-  // 🔒 STEP A2: mock credential
-  if (user === 'admin' && pass === '1234') {
-    sessionStorage.setItem('admin_logged_in', 'true');
-    sessionStorage.setItem('admin_user', JSON.stringify({ user }));
+  const url =
+    `${API_BASE}?action=adminLogin` +
+    `&username=${encodeURIComponent(user)}` +
+    `&password=${encodeURIComponent(pass)}`;
 
-    state.admin.loggedIn = true;
-    state.admin.user = { user };
-
-    closeAdminLogin();
-    alert('เข้าสู่ระบบสำเร็จ');
-  } else {
-    alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  let data;
+  try {
+    const res = await fetch(url);
+    data = await res.json();
+  } catch (err) {
+    alert('ไม่สามารถเชื่อมต่อระบบล็อกอินได้');
+    return;
   }
+
+  if (data.สถานะ !== 'สำเร็จ') {
+    alert(data.ข้อความ || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    return;
+  }
+
+  // ✅ LOGIN SUCCESS
+  sessionStorage.setItem('admin_logged_in', 'true');
+  sessionStorage.setItem(
+    'admin_user',
+    JSON.stringify(data.ข้อมูล)
+  );
+
+  state.admin.loggedIn = true;
+  state.admin.user = data.ข้อมูล;
+
+  closeAdminLogin();
+  alert('เข้าสู่ระบบสำเร็จ');
 }
+
 
 </script>
 
