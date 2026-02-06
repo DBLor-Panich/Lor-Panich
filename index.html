@@ -767,6 +767,91 @@ body.menu-open .product-card.glass {
   };
 </script>
 
+<script>
+/* ======================================================
+   📦 ORDER STORE (STEP S3)
+   - Single source of truth for Orders
+   - Storage: localStorage
+====================================================== */
+
+const OrderStore = (() => {
+  const STORAGE_KEY = 'orders';
+
+  /* ---------- internal helpers ---------- */
+
+  function _load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function _save(orders) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+  }
+
+  function _generateId() {
+    return (
+      'ORD-' +
+      Date.now().toString(36) +
+      '-' +
+      Math.random().toString(36).slice(2, 6)
+    ).toUpperCase();
+  }
+
+  /* ---------- public API ---------- */
+
+  function create({ items }) {
+    const orders = _load();
+
+    const order = {
+      orderId: _generateId(),
+      items: JSON.parse(JSON.stringify(items)),
+      createdAt: new Date().toISOString(),
+      status: 'pending'
+    };
+
+    orders.unshift(order); // newest first
+    _save(orders);
+
+    return order;
+  }
+
+  function list() {
+    return _load();
+  }
+
+  function get(orderId) {
+    return _load().find(o => o.orderId === orderId) || null;
+  }
+
+  function update(orderId, patch = {}) {
+    const orders = _load();
+    const index = orders.findIndex(o => o.orderId === orderId);
+
+    if (index === -1) return null;
+
+    orders[index] = {
+      ...orders[index],
+      ...patch
+    };
+
+    _save(orders);
+    return orders[index];
+  }
+
+  return {
+    create,
+    list,
+    get,
+    update
+  };
+})();
+</script>
+
+
 <!-- 🔒 ADMIN GUARD (ARCH PREPARE) -->
 <script>
   const Admin = {
