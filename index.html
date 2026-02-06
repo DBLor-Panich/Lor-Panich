@@ -954,19 +954,23 @@ async function submitAdminLogin() {
 
  <script>
  function hydrateAdminState() {
-   const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
-   const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
-if (expireAt && Date.now() > expireAt) {
-  sessionStorage.clear();
-  return;
+  const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+  const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
+
+  if (expireAt && Date.now() > expireAt) {
+    sessionStorage.clear();
+    state.admin.loggedIn = false;
+    state.admin.user = null;
+  }
+
+  if (loggedIn) {
+    state.admin.loggedIn = true;
+    try {
+      state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
+    } catch {}
+  }
 }
-   if (loggedIn) {
-     state.admin.loggedIn = true;
-     try {
-       state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
-     } catch {}
-   }
- }
+
  </script>
 
  <!-- ===============================
