@@ -853,7 +853,6 @@ const OrderStore = (() => {
 
 
 <!-- 🔒 ADMIN GUARD (ARCH PREPARE) -->
- 
 <script>
   const Admin = {
     isLoggedIn() {
@@ -861,37 +860,14 @@ const OrderStore = (() => {
     },
 
     guard() {
-      const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
-
-      // ⏱️ Session expired → silent logout
-      if (expireAt && Date.now() > expireAt) {
-        this.logout(true);
-      }
-
       if (!this.isLoggedIn()) {
         openAdminLogin();
-        return false;
+        return false; // ⛔ stop admin flow here
       }
       return true;
-    },
-
-    logout(silent = false) {
-      // 🧹 Clear session storage
-      sessionStorage.removeItem('admin_logged_in');
-      sessionStorage.removeItem('admin_user');
-      sessionStorage.removeItem('admin_expire_at');
-
-      // 🔄 Reset state
-      state.admin.loggedIn = false;
-      state.admin.user = null;
-
-      if (!silent) {
-        alert('ออกจากระบบแล้ว');
-      }
     }
   };
 </script>
-
 
  <script>
 function openAdminLogin() {
@@ -907,8 +883,8 @@ function closeAdminLogin() {
   document.body.classList.remove('admin-opening');
 }
 
-async function submitAdminLogin() {
-  const user = document.getElementById('admin-user').value.trim();
+function submitAdminLogin() {
+  const user = document.getElementById('admin-user').value;
   const pass = document.getElementById('admin-pass').value;
 
   if (!user || !pass) {
@@ -916,281 +892,63 @@ async function submitAdminLogin() {
     return;
   }
 
-  const callbackName = 'adminLoginCallback_' + Date.now();
+  // 🔒 STEP A2: mock credential
+  if (user === 'admin' && pass === '1234') {
+    sessionStorage.setItem('admin_logged_in', 'true');
+    sessionStorage.setItem('admin_user', JSON.stringify({ user }));
 
-  window[callbackName] = function (data) {
-    delete window[callbackName];
-    document.body.removeChild(script);
-
-    if (data.สถานะ !== 'สำเร็จ') {
-      alert(data.ข้อความ || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-      return;
-    }
-
- sessionStorage.setItem('admin_logged_in', 'true');
- sessionStorage.setItem('admin_user', JSON.stringify(data.ข้อมูล));
- // ⏱️ session expire: 8 ชั่วโมง
- sessionStorage.setItem('admin_expire_at', String(Date.now() + 8 * 60 * 60 * 1000));
-
- state.admin.loggedIn = true;
- state.admin.user = data.ข้อมูล;
+    state.admin.loggedIn = true;
+    state.admin.user = { user };
 
     closeAdminLogin();
     alert('เข้าสู่ระบบสำเร็จ');
-  };
-
-  const script = document.createElement('script');
-  script.src =
-    `${API_BASE}?action=adminLogin` +
-    `&username=${encodeURIComponent(user)}` +
-    `&password=${encodeURIComponent(pass)}` +
-    `&callback=${callbackName}`;
-
-  document.body.appendChild(script);
+  } else {
+    alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
 }
-
 
 </script>
 
  <script>
  function hydrateAdminState() {
-  const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
-  const expireAt = Number(sessionStorage.getItem('admin_expire_at') || 0);
-
-  if (expireAt && Date.now() > expireAt) {
-    sessionStorage.clear();
-    state.admin.loggedIn = false;
-    state.admin.user = null;
-  }
-
-  if (loggedIn) {
-    state.admin.loggedIn = true;
-    try {
-      state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
-    } catch {}
-  }
-}
-
+   const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+   if (loggedIn) {
+     state.admin.loggedIn = true;
+     try {
+       state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
+     } catch {}
+   }
+ }
  </script>
-
- <!-- ===============================
-     🛡️ ADMIN DASHBOARD (B1)
-================================= -->
-<div id="admin-dashboard" style="
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:120;
-">
-  <div style="
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    width:min(920px, 92vw);
-    max-height:80vh;
-    background:#fff;
-    border-radius:16px;
-    overflow:hidden;
-    box-shadow:0 20px 60px rgba(0,0,0,.25);
-    display:flex;
-    flex-direction:column;
-  ">
-    <div style="
-      padding:16px 20px;
-      border-bottom:1px solid #eee;
-      font-weight:700;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    ">
-      <span>🛡️ Admin · Order Pending</span>
-
-<div style="display:flex;align-items:center;gap:8px;">
-  <button
-    onclick="Admin.logout()"
-    style="
-      border:none;
-      background:none;
-      cursor:pointer;
-      font-size:13px;
-      color:#c0392b;
-    "
-  >
-    ออกจากระบบ
-  </button>
-
-  <button
-    onclick="AdminUI.close()"
-    style="
-      border:none;
-      background:none;
-      cursor:pointer;
-      font-size:18px;
-    "
-  >
-    ✕
-  </button>
-</div>
-
-
-    <div id="admin-order-list" style="
-      padding:16px;
-      overflow:auto;
-      flex:1;
-    ">
-      <!-- rows injected -->
-    </div>
-  </div>
-</div>
-
-<script>
-/* ======================================================
-   🛡️ ADMIN UI (B1) — Pending Orders
-   - Guard เฉพาะตอนเปิด
-   - ปลอดภัยถ้า DOM ยังไม่พร้อม
-====================================================== */
-
-const AdminUI = (() => {
-  const el = () => document.getElementById('admin-dashboard');
-  const listEl = () => document.getElementById('admin-order-list');
-
-  function open() {
-    if (!Admin.guard()) return;
-
-    const root = el();
-    if (!root) return;
-
-    render();
-    root.style.display = 'block';
-  }
-
-  function close() {
-    const root = el();
-    if (root) root.style.display = 'none';
-  }
-
-  function render() {
-    const list = listEl();
-    if (!list) return;
-
-    const orders = OrderStore
-      .list()
-      .filter(o => o.status === 'pending');
-
-    if (!orders.length) {
-      list.innerHTML =
-        `<div style="color:#666">ไม่มี Order ที่รอดำเนินการ</div>`;
-      return;
-    }
-
-    list.innerHTML = orders.map(o => {
-      const total = o.items.reduce(
-        (sum, i) => sum + (i.ราคาทุน * i.จำนวน), 0
-      );
-
-      const date = new Date(o.createdAt).toLocaleString('th-TH');
-
-      return `
-        <div
-          style="
-            border:1px solid #eee;
-            border-radius:12px;
-            padding:12px 14px;
-            margin-bottom:12px;
-            cursor:pointer;
-          "
-          data-order-id="${o.orderId}"
-          class="admin-order-row"
-        >
-          <div style="font-weight:700">${o.orderId}</div>
-          <div style="font-size:13px;color:#555">${date}</div>
-          <div style="margin-top:6px;font-size:14px">
-            ${o.items.length} รายการ · รวม ${total.toLocaleString()} บาท
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // bind click (ไม่ใช้ inline onclick)
-    list.querySelectorAll('.admin-order-row').forEach(row => {
-      row.onclick = () => view(row.dataset.orderId);
-    });
-  }
-
-  function view(orderId) {
-    const order = OrderStore.get(orderId);
-    if (!order) return;
-
-    const ok = confirm(
-      `Order: ${order.orderId}\n` +
-      `รายการ: ${order.items.length}\n\n` +
-      `กด OK = อนุมัติ\nCancel = ปฏิเสธ`
-    );
-
-    if (ok) {
-      approve(orderId);
-    } else {
-      reject(orderId);
-    }
-  }
-
-  function approve(orderId) {
-    OrderStore.update(orderId, { status: 'approved' });
-    render();
-  }
-
-  function reject(orderId) {
-    OrderStore.update(orderId, { status: 'rejected' });
-    render();
-  }
-
-  // expose public API
-  return {
-    open,
-    close,
-    render,
-    view
-  };
-})();
-</script>
-
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
-  const API_BASE =
-    'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
 
-  function fetchProductsJSONP() {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'productCallback_' + Date.now();
+  async function ดึงรายการสินค้า() {
+    const url = `${API_BASE}?action=ดึงรายการสินค้า`;
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+  }
 
-      const script = document.createElement('script');
+  if (!res.ok) {
+    throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด');
+  }
 
-      window[callbackName] = function (data) {
-        delete window[callbackName];
-        document.body.removeChild(script);
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error('ข้อมูลที่ได้ไม่ถูกต้อง');
+  }
 
-        if (data.สถานะ !== 'สำเร็จ') {
-          reject(new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้'));
-          return;
-        }
-
-        resolve(data.ข้อมูล.รายการสินค้า);
-      };
-
-      script.src =
-        `${API_BASE}?action=ดึงรายการสินค้า&callback=${callbackName}`;
-
-      script.onerror = () => {
-        delete window[callbackName];
-        document.body.removeChild(script);
-        reject(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
-      };
-
-      document.body.appendChild(script);
-    });
+    if (data.สถานะ !== 'สำเร็จ') {
+      throw new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้');
+    }
+    return data.ข้อมูล.รายการสินค้า;
   }
 </script>
 
@@ -1625,14 +1383,21 @@ if (!state.cart.items.length) {
 function goToSummary() {
   if (!state.cart.items.length) return;
 
-  // ✅ Order ถูกเก็บถาวรใน OrderStore (localStorage)
-  OrderStore.create({
+  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
+  const order = OrderStore.create({
     items: JSON.parse(JSON.stringify(state.cart.items))
   });
+
+  // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
+  sessionStorage.setItem(
+    'order_summary',
+    JSON.stringify(order)
+  );
 
   window.open('summary.html', '_blank');
   showOrderSuccess();
 }
+
 
  function showOrderSuccess() {
   document.getElementById('order-success-overlay').style.display = 'block';
@@ -1823,12 +1588,6 @@ function hideLoading() {
 }
 </script>
 
-<script>
- // 🔁 Alias เพื่อให้ initApp ใช้งานได้
- function ดึงรายการสินค้า() {
-   return fetchProductsJSONP();
- }
-</script>
 <!-- INIT APP -->
 <script>
   async function initApp() {
