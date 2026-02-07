@@ -972,6 +972,19 @@ const OrderStore = (() => {
 
     return data.ข้อมูล; // { adminId, username }
   }
+
+  // 📋 STEP A4 — Get Orders (ADMIN)
+  async function getOrders() {
+    const url = `${API_BASE}?action=getOrders`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.สถานะ !== 'สำเร็จ') {
+      throw new Error(data.ข้อความ || 'ไม่สามารถดึงคำสั่งซื้อได้');
+    }
+
+    return data.ข้อมูล.orders || [];
+  }
 </script>
 
 
