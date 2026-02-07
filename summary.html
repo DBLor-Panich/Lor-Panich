@@ -160,6 +160,9 @@ body.exporting #print-bar {
 
   
 <script>
+
+ const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
+ 
  function renderFromBackend({ order, items }) {
    const createdAt = order['วันที่สร้าง']
      ? new Date(order['วันที่สร้าง'])
