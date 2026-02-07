@@ -933,17 +933,6 @@ const OrderStore = (() => {
   }
 </script>
 
- <script>
- function hydrateAdminState() {
-   const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
-   if (loggedIn) {
-     state.admin.loggedIn = true;
-     try {
-       state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
-     } catch {}
-   }
- }
- </script>
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
