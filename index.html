@@ -1142,6 +1142,50 @@ const OrderStore = (() => {
       `;
     }
   }
+
+  // 📄 STEP A4.6 — Open Order Detail (ADMIN)
+ async function openOrderDetail(orderId) {
+   const overlay = document.getElementById('order-detail-overlay');
+   const container = document.getElementById('order-detail-content');
+
+   if (!overlay || !container) return;
+
+   overlay.style.display = 'block';
+   container.innerHTML = 'กำลังโหลดรายละเอียดคำสั่งซื้อ...';
+
+   try {
+     const orders = await getOrders();
+     const order = orders.find(o => o.orderId === orderId);
+
+     if (!order) {
+       container.innerHTML = '<div class="empty">ไม่พบคำสั่งซื้อ</div>';
+       return;
+     }
+
+     container.innerHTML = `
+       <div style="font-size:14px;">
+         <div><strong>Order ID:</strong> ${order.orderId}</div>
+         <div><strong>สถานะ:</strong> ${order.status}</div>
+         <div style="margin-top:12px;"><strong>รายการสินค้า</strong></div>
+       </div>
+       <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+         ${order.items.map(it => `
+           <div class="glass" style="padding:10px;">
+             <div><strong>${it.name || it['ชื่อสินค้า']}</strong></div>
+             <div style="font-size:12px;">
+               SKU: ${it.sku || it['รหัส SKU']}<br>
+               จำนวน: ${it.qty || it['จำนวน']}<br>
+               ทุน: ${(it.cost || it['ราคาทุน']).toLocaleString()} บาท
+             </div>
+           </div>
+         `).join('')}
+       </div>
+     `;
+
+   } catch (err) {
+     container.innerHTML = `<div class="empty">${err.message}</div>`;
+   }
+ }
  </script>
  
 <script>
