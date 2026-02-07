@@ -383,25 +383,6 @@ body.menu-open .product-card.glass {
    color: rgba(255,235,235,0.95);
  }
 
- .status-badge.pending {
-   background: rgba(255,200,80,0.25);
-   color: #ffe0a0;
- }
- .status-badge.approved {
-   background: rgba(40,180,120,0.25);
-   color: #d8fff0;
- }
- .status-badge.rejected {
-   background: rgba(255,80,80,0.28);
-   color: #ffd8d8;
- }
-
- .admin-order-card {
-   padding:14px;
-   cursor:pointer;
- }
-
-
 /* 🛒 STEP 7.1 – Cart Overlay */
 #cart-overlay {
   display: none;
@@ -749,9 +730,9 @@ body.menu-open .product-card.glass {
            >✕</button>
          </div>
 
- <div class="menu-item" onclick="openAdminDashboard()">
-   📋 Admin Dashboard
- </div>
+         <div class="menu-item" onclick="onAdminLogin()">
+           🔐 เข้าสู่ระบบ (Admin)
+         </div>
        
          <div class="menu-item" onclick="onSearch()">
            🔍 ค้นหาสินค้า
@@ -770,70 +751,6 @@ body.menu-open .product-card.glass {
    </div>
  </div>
 
- <!-- 🔐 STEP A4.4 — ADMIN DASHBOARD -->
-<div id="admin-dashboard-overlay" style="
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:120;
-  background:rgba(0,0,0,0.35);
-">
-  <div class="glass" style="
-    position:absolute;
-    inset:16px;
-    padding:16px;
-    overflow:auto;
-  ">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-size:17px;font-weight:700;color:#fff;">
-        📋 Admin Dashboard
-      </div>
-      <button onclick="this.closest('#admin-dashboard-overlay').style.display='none'"
-        style="background:none;border:none;font-size:18px;color:#fff;">✕</button>
-    </div>
-
-    <div id="admin-order-list" style="display:flex;flex-direction:column;gap:12px;"></div>
-  </div>
-</div>
-
- <!-- 📋 STEP A4.5 — ORDER DETAIL (READ-ONLY) -->
- <div id="order-detail-overlay" style="
-   display:none;
-   position:fixed;
-   inset:0;
-   z-index:140;
-   background:rgba(0,0,0,0.4);
- ">
-   <div class="glass" style="
-     position:absolute;
-     inset:16px;
-     padding:16px;
-     overflow:auto;
-   ">
-     <div style="
-       display:flex;
-       justify-content:space-between;
-       align-items:center;
-       margin-bottom:12px;
-     ">
-       <div style="font-size:17px;font-weight:700;color:#fff;">
-         📄 รายละเอียดคำสั่งซื้อ
-       </div>
-       <button onclick="
-         document.getElementById('order-detail-overlay').style.display='none'
-       " style="
-         background:none;
-         border:none;
-         font-size:18px;
-         color:#fff;
-       ">✕</button>
-     </div>
-
-     <div id="order-detail-content"
-       style="display:flex;flex-direction:column;gap:12px;">
-     </div>
-   </div>
- </div>
 
 <!-- GLOBAL STATE -->
 <script>
@@ -943,30 +860,13 @@ const OrderStore = (() => {
     },
 
     guard() {
-  if (!this.isLoggedIn()) {
-    // 🔒 prevent duplicate login overlay
-    if (!document.getElementById('admin-login-overlay')?.style.display ||
-        document.getElementById('admin-login-overlay').style.display === 'none') {
-      openAdminLogin();
-    }
-    return false;
-  }
-  return true;
+      if (!this.isLoggedIn()) {
+        openAdminLogin();
+        return false;
+      }
+      return true;
     }
   };
-
-  // 🔐 STEP A4 — Open Admin Dashboard (Entry Point)
-  function openAdminDashboard() {
-    closeMenu();
-
-    if (!Admin.guard()) return;
-
-    const el = document.getElementById('admin-dashboard-overlay');
-    if (el) el.style.display = 'block';
-
-    // โหลดรายการคำสั่งซื้อจริง
-    renderAdminDashboard();
-  }
 </script>
 
 <script>
@@ -1033,6 +933,17 @@ const OrderStore = (() => {
   }
 </script>
 
+ <script>
+ function hydrateAdminState() {
+   const loggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+   if (loggedIn) {
+     state.admin.loggedIn = true;
+     try {
+       state.admin.user = JSON.parse(sessionStorage.getItem('admin_user'));
+     } catch {}
+   }
+ }
+ </script>
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
@@ -1072,160 +983,14 @@ const OrderStore = (() => {
 
     return data.ข้อมูล; // { adminId, username }
   }
-
-  // 📋 STEP A4 — Get Orders (ADMIN)
-  async function getOrders() {
-    const url = `${API_BASE}?action=getOrders`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if (data.สถานะ !== 'สำเร็จ') {
-      throw new Error(data.ข้อความ || 'ไม่สามารถดึงคำสั่งซื้อได้');
-    }
-
-    return data.ข้อมูล.orders || [];
-  }
 </script>
 
 
 <!-- RENDER FUNCTIONS -->
-  <script>
-
-  // 📋 STEP A4.4 — Render Admin Dashboard (Order List)
-  async function renderAdminDashboard() {
-    const container = document.getElementById('admin-order-list');
-    if (!container) return;
-
-    container.innerHTML = 'กำลังโหลดคำสั่งซื้อ...';
-
-    try {
-      const orders = await getOrders();
-
-      if (!orders.length) {
-        container.innerHTML = `
-          <div class="empty">
-            ยังไม่มีคำสั่งซื้อ
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = '';
-
-      orders.forEach(order => {
-        const card = document.createElement('div');
-        card.className = 'admin-order-card glass';
-        card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;">
-            <div>
-              <strong>${order.orderId}</strong><br>
-              <small>${order.วันที่สร้าง || ''}</small>
-            </div>
-            <div class="status-badge ${order.status}">
-              ${order.status}
-            </div>
-          </div>
-        `;
-
-        card.onclick = () => {
-          openOrderDetail(order.orderId);
-        };
-
-        container.appendChild(card);
-      });
-
-    } catch (err) {
-      container.innerHTML = `
-        <div class="empty">
-          ${err.message}
-        </div>
-      `;
-    }
-  }
-
- </script>
-
- <script>
-/* 📄 STEP A4.6 — Open Order Detail (ADMIN) */
-async function openOrderDetail(orderId) {
-  const overlay = document.getElementById('order-detail-overlay');
-  const container = document.getElementById('order-detail-content');
-
-  if (!overlay || !container) return;
-
-  overlay.style.display = 'block';
-  container.innerHTML = 'กำลังโหลดรายละเอียดคำสั่งซื้อ...';
-
-  try {
-    const orders = await getOrders();
-    const order = orders.find(o => o.orderId === orderId);
-
-    if (!order) {
-      container.innerHTML = '<div class="empty">ไม่พบคำสั่งซื้อ</div>';
-      return;
-    }
-
-    /* 🔴 FIX: items อาจเป็น string */
-    let items = order.items;
-    if (typeof items === 'string') {
-      try {
-        items = JSON.parse(items);
-      } catch {
-        items = [];
-      }
-    }
-
-    container.innerHTML = `
-      <div class="glass" style="padding:12px;">
-        <div><strong>Order ID:</strong> ${order.orderId}</div>
-        <div><strong>สถานะ:</strong> ${order.status}</div>
-        <div style="font-size:12px;color:#ccc;">
-          วันที่สร้าง: ${order.วันที่สร้าง || order.createdAt || '-'}
-        </div>
-      </div>
-
-      <div style="margin-top:12px;font-weight:600;">
-        รายการสินค้า
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${
-          items.length
-            ? items.map(it => `
-              <div class="glass" style="padding:10px;">
-                <div style="font-weight:600;">
-                  ${it.name || it.ชื่อสินค้า || '-'}
-                </div>
-                <div style="font-size:12px;opacity:0.85;">
-                  SKU: ${it.sku || it['รหัส SKU'] || '-'}<br>
-                  จำนวน: ${it.qty || it['จำนวน'] || 0}<br>
-                  ทุน: ${Number(it.cost || it['ราคาทุน'] || 0).toLocaleString()} บาท
-                </div>
-              </div>
-            `).join('')
-            : `<div class="empty">ไม่มีรายการสินค้า</div>`
-        }
-      </div>
-    `;
-
-  } catch (err) {
-    container.innerHTML = `
-      <div class="empty">
-        เกิดข้อผิดพลาด: ${err.message}
-      </div>
-    `;
-  }
-}
-</script>
- 
 <script>
   function renderProductList() {
-  const container = document.getElementById('product-list');
-  if (!container) return;
-
-  container.classList.remove('is-visible');
-  container.innerHTML = '';
-
+    const container = document.getElementById('product-list');
+    container.innerHTML = '';
 
     if (!state.products || state.products.length === 0) {
       container.innerHTML = `
@@ -1255,9 +1020,9 @@ async function openOrderDetail(orderId) {
           <div class="product-sku">${p['รหัส SKU'] || ''}</div>
 
           <!-- 🔴 CHANGED: แสดงราคาทุนเท่านั้น -->
- <div class="product-cost">
-   ทุน ${Number(p['ราคาทุน'] || 0).toLocaleString()} บาท
- </div>
+  <div class="product-cost">
+    ทุน ${p['ราคาทุน'] || 0} บาท
+  </div>
  <div class="product-stock">
    คงเหลือ ${stock} ชิ้น
  </div>
@@ -1411,38 +1176,15 @@ function closeConfirmAdd() {
    document.getElementById('confirm-summary-overlay').style.display = 'none';
  }
 
-async function confirmSummary() {
-  // ปิด confirm sheet ตามเดิม
+ function confirmSummary() {
   closeConfirmSummary();
 
-  // 🔥 1️⃣ เปิด summary ทันทีใน user gesture (ห้าม await ก่อนบรรทัดนี้)
-  const summaryWin = window.open(
-    'summary.html?pending=1',
-    '_blank'
-  );
-
-  // 🛡️ ป้องกันกรณี popup ถูก block
-  if (!summaryWin) {
-    alert('ไม่สามารถเปิดเอกสารได้ กรุณาอนุญาต popup');
-    return;
-  }
-
-  try {
-    // 2️⃣ สร้าง order ที่ backend
-    const orderId = await submitOrder();
-    // ⬆️ submitOrder() ต้อง return orderId จาก backend เท่านั้น
-
-    // 3️⃣ redirect เมื่อ order พร้อมจริง
-    summaryWin.location.href =
-      `summary.html?orderId=${encodeURIComponent(orderId)}`;
-
-  } catch (err) {
-    // ❌ กรณีสร้าง order ไม่สำเร็จ
-    summaryWin.close();
-    alert(err.message || 'เกิดข้อผิดพลาดในการสร้างออเดอร์');
-  }
-}
- 
+  // 🔓 ensure browser treats this as direct user action
+  setTimeout(() => {
+    goToSummary();
+  }, 0);
+ }
+  
 function addToCartConfirmed() {
   closeConfirmAdd();
   openQuantityOverlay();
@@ -1675,44 +1417,21 @@ if (!state.cart.items.length) {
 function goToSummary() {
   if (!state.cart.items.length) return;
 
-  (async () => {
-    try {
-      showLoading();
+  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
+  const order = OrderStore.create({
+    items: JSON.parse(JSON.stringify(state.cart.items))
+  });
 
-      const payload = {
-        customerName: '',
-        note: '',
-        items: JSON.stringify(
-          state.cart.items.map(it => ({
-            sku: it['รหัส SKU'],
-            name: it['ชื่อสินค้า'],
-            qty: it.จำนวน,
-            cost: it.ราคาทุน
-          }))
-        )
-      };
+  // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
+  sessionStorage.setItem(
+    'order_summary',
+    JSON.stringify(order)
+  );
 
-      const query = new URLSearchParams(payload).toString();
-      const res = await fetch(`${API_BASE}?action=createOrder&${query}`);
-      const data = await res.json();
+  window.open('summary.html', '_blank');
+  showOrderSuccess();
+}
 
-      if (data.สถานะ !== 'สำเร็จ') {
-        throw new Error(data.ข้อความ || 'สร้างคำสั่งซื้อไม่สำเร็จ');
-      }
-
-      // ✅ Source of truth จาก Backend
-      sessionStorage.setItem('order_id', data.ข้อมูล.orderId);
-
-      window.open('summary.html', '_blank');
-      showOrderSuccess();
-
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      hideLoading();
-    }
-  })();
- }
 
  function showOrderSuccess() {
   document.getElementById('order-success-overlay').style.display = 'block';
