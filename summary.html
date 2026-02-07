@@ -162,7 +162,10 @@ body.exporting #print-bar {
 <script>
 
  const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
- 
+
+ // 🟢 FIX #4: Render Ready Flag
+ window.__renderReady = false;
+  
  function renderFromBackend({ order, items }) {
    const createdAt = order['วันที่สร้าง']
      ? new Date(order['วันที่สร้าง'])
@@ -268,12 +271,19 @@ body.exporting #print-bar {
     });
 
       pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal.toLocaleString()} บาท`;
+
+ // ✅ mark render completed
+ window.__renderReady = true;
   }
   
  // STEP 8.6 — Print / PDF
  const printBtn = document.getElementById('btn-print');
  if (printBtn) {
    printBtn.onclick = () => {
+       if (!window.__renderReady) {
+    alert('เอกสารยังไม่พร้อมสำหรับการพิมพ์');
+    return;
+  }
      window.print();
    };
  }
@@ -282,6 +292,11 @@ body.exporting #print-bar {
  const exportBtn = document.getElementById('btn-export');
  if (exportBtn) {
    exportBtn.onclick = async () => {
+  if (!window.__renderReady) {
+    alert('เอกสารยังไม่พร้อมสำหรับการบันทึก');
+    return;
+  }
+
      document.body.classList.add('exporting');
 
      const pages = document.querySelectorAll('.a4-page');
