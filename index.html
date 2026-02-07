@@ -852,7 +852,7 @@ const OrderStore = (() => {
 </script>
 
 
-<!-- 🔒 ADMIN GUARD (ARCH PREPARE) -->
+<!-- ADMIN FLOW -->
 <script>
   const Admin = {
     isLoggedIn() {
@@ -862,51 +862,75 @@ const OrderStore = (() => {
     guard() {
       if (!this.isLoggedIn()) {
         openAdminLogin();
-        return false; // ⛔ stop admin flow here
+        return false;
       }
       return true;
     }
   };
 </script>
 
- <script>
-function openAdminLogin() {
-  if (document.body.classList.contains('admin-opening')) return;
-  document.body.classList.add('admin-opening');
-  const el = document.getElementById('admin-login-overlay');
-  if (el) el.style.display = 'block';
-}
-
-function closeAdminLogin() {
-  const el = document.getElementById('admin-login-overlay');
-  if (el) el.style.display = 'none';
-  document.body.classList.remove('admin-opening');
-}
-
-function submitAdminLogin() {
-  const user = document.getElementById('admin-user').value;
-  const pass = document.getElementById('admin-pass').value;
-
-  if (!user || !pass) {
-    alert('กรุณากรอกข้อมูลให้ครบ');
-    return;
+<script>
+  function openAdminLogin() {
+    const el = document.getElementById('admin-login-overlay');
+    if (el) el.style.display = 'block';
   }
 
-  // 🔒 STEP A2: mock credential
-  if (user === 'admin' && pass === '1234') {
-    sessionStorage.setItem('admin_logged_in', 'true');
-    sessionStorage.setItem('admin_user', JSON.stringify({ user }));
-
-    state.admin.loggedIn = true;
-    state.admin.user = { user };
-
-    closeAdminLogin();
-    alert('เข้าสู่ระบบสำเร็จ');
-  } else {
-    alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  function closeAdminLogin() {
+    const el = document.getElementById('admin-login-overlay');
+    if (el) el.style.display = 'none';
   }
-}
 
+  // 🔐 STEP A3 — Submit Login (REAL)
+  async function submitAdminLogin() {
+    const user = document.getElementById('admin-user').value.trim();
+    const pass = document.getElementById('admin-pass').value.trim();
+
+    if (!user || !pass) {
+      alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      return;
+    }
+
+    try {
+      showLoading();
+
+      const result = await adminLogin(user, pass);
+
+      // 🔴 CHANGED: state จาก Backend จริง
+      state.admin.loggedIn = true;
+      state.admin.user = {
+        adminId: result.adminId,
+        username: result.username
+      };
+
+      // persist session
+      sessionStorage.setItem(
+        'admin_session',
+        JSON.stringify(state.admin.user)
+      );
+
+      closeAdminLogin();
+      alert('เข้าสู่ระบบสำเร็จ');
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // 🔁 Restore admin session
+  function hydrateAdminState() {
+    try {
+      const raw = sessionStorage.getItem('admin_session');
+      if (!raw) return;
+
+      const user = JSON.parse(raw);
+      if (user?.adminId) {
+        state.admin.loggedIn = true;
+        state.admin.user = user;
+      }
+    } catch {}
+  }
 </script>
 
  <script>
@@ -923,34 +947,44 @@ function submitAdminLogin() {
 
 <!-- API LAYER (Google Apps Script) -->
 <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
+  const API_BASE =
+    'https://script.google.com/macros/s/AKfycbznRDSjq7rje7ewMbrh15N0RW2teEmIPNGS_iQpHgLiRXCq66RlrJYsVk2J-dO6p2sN/exec';
 
   async function ดึงรายการสินค้า() {
     const url = `${API_BASE}?action=ดึงรายการสินค้า`;
-  let res;
-  try {
-    res = await fetch(url);
-  } catch (e) {
-    throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-  }
-
-  if (!res.ok) {
-    throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด');
-  }
-
-  let data;
-  try {
-    data = await res.json();
-  } catch (e) {
-    throw new Error('ข้อมูลที่ได้ไม่ถูกต้อง');
-  }
+    const res = await fetch(url);
+    const data = await res.json();
 
     if (data.สถานะ !== 'สำเร็จ') {
-      throw new Error(data.ข้อความ || 'ไม่สามารถดึงข้อมูลได้');
+      throw new Error(data.ข้อความ || 'ดึงข้อมูลสินค้าไม่สำเร็จ');
     }
     return data.ข้อมูล.รายการสินค้า;
   }
+
+  // 🔐 STEP A3 — Admin Login (REAL API)
+  async function adminLogin(username, password) {
+    const url =
+      `${API_BASE}?action=adminLogin` +
+      `&username=${encodeURIComponent(username)}` +
+      `&password=${encodeURIComponent(password)}`;
+
+    let res;
+    try {
+      res = await fetch(url);
+    } catch {
+      throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+    }
+
+    const data = await res.json();
+
+    if (data.สถานะ !== 'สำเร็จ') {
+      throw new Error(data.ข้อความ || 'เข้าสู่ระบบไม่สำเร็จ');
+    }
+
+    return data.ข้อมูล; // { adminId, username }
+  }
 </script>
+
 
 <!-- RENDER FUNCTIONS -->
 <script>
@@ -1592,21 +1626,20 @@ function hideLoading() {
 <script>
   async function initApp() {
     try {
-     showLoading();     
+      showLoading();
       state.products = await ดึงรายการสินค้า();
       renderProductList();
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + err.message);
-   } finally {
-     hideLoading();     
+    } finally {
+      hideLoading();
     }
   }
 
- window.addEventListener('DOMContentLoaded', () => {
-   hydrateAdminState();
-   initApp();
- });
- 
+  window.addEventListener('DOMContentLoaded', () => {
+    hydrateAdminState(); // 🔴 CHANGED
+    initApp();
+  });
 </script>
   
  <!-- VIEWER FLOW : PRODUCT DETAIL -->
