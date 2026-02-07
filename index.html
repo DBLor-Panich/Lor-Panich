@@ -796,6 +796,44 @@ body.menu-open .product-card.glass {
   </div>
 </div>
 
+ <!-- 📋 STEP A4.5 — ORDER DETAIL (READ-ONLY) -->
+ <div id="order-detail-overlay" style="
+   display:none;
+   position:fixed;
+   inset:0;
+   z-index:140;
+   background:rgba(0,0,0,0.4);
+ ">
+   <div class="glass" style="
+     position:absolute;
+     inset:16px;
+     padding:16px;
+     overflow:auto;
+   ">
+     <div style="
+       display:flex;
+       justify-content:space-between;
+       align-items:center;
+       margin-bottom:12px;
+     ">
+       <div style="font-size:17px;font-weight:700;color:#fff;">
+         📄 รายละเอียดคำสั่งซื้อ
+       </div>
+       <button onclick="
+         document.getElementById('order-detail-overlay').style.display='none'
+       " style="
+         background:none;
+         border:none;
+         font-size:18px;
+         color:#fff;
+       ">✕</button>
+     </div>
+
+     <div id="order-detail-content"
+       style="display:flex;flex-direction:column;gap:12px;">
+     </div>
+   </div>
+ </div>
 
 <!-- GLOBAL STATE -->
 <script>
