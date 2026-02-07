@@ -228,7 +228,13 @@ body.exporting #print-bar {
     let pageTotal = 0;
 
     items.forEach(item => {
-      const subtotal = item.ราคาทุน * item.จำนวน;
+  const name = item.ชื่อสินค้า ?? item.name ?? '-';
+  const sku  = item['รหัส SKU'] ?? item.sku ?? '-';
+  const qty  = item.จำนวน ?? item.qty ?? 0;
+  const cost = item.ราคาทุน ?? item.cost ?? 0;
+  const img  = item.รูปสินค้า ?? '';
+
+  const subtotal = cost * qty;
       total += subtotal;
       pageTotal += subtotal;
 
@@ -236,15 +242,15 @@ body.exporting #print-bar {
       row.className = 'row';
       row.innerHTML = `
         <div class="product">
-          ${item.รูปสินค้า ? `<img src="${item.รูปสินค้า}" />` : ''}
+          ${img ? `<img src="${img}" />` : ''}
         </div>
         <div>
-          <div><strong>${item.ชื่อสินค้า}</strong></div>
-          <div style="font-size:11px;color:#555;">SKU: ${item['รหัส SKU']}</div>
+ <div><strong>${name}</strong></div>
+ <div style="font-size:11px;color:#555;">SKU: ${sku}</div>
         </div>
-        <div class="center">${item.จำนวน}</div>
- <div class="right">${item.ราคาทุน.toLocaleString()}</div>
- <div class="right">${subtotal.toLocaleString()}</div>
+ <div class="center">${qty}</div>
+ <div class="right">${Number(cost).toLocaleString()}</div>
+ <div class="right">${Number(subtotal).toLocaleString()}</div>
       `;
 
       itemsContainer.appendChild(row);
