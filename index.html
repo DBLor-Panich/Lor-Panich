@@ -860,11 +860,15 @@ const OrderStore = (() => {
     },
 
     guard() {
-      if (!this.isLoggedIn()) {
-        openAdminLogin();
-        return false;
-      }
-      return true;
+  if (!this.isLoggedIn()) {
+    // 🔒 prevent duplicate login overlay
+    if (!document.getElementById('admin-login-overlay')?.style.display ||
+        document.getElementById('admin-login-overlay').style.display === 'none') {
+      openAdminLogin();
+    }
+    return false;
+  }
+  return true;
     }
   };
 </script>
