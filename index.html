@@ -803,11 +803,11 @@ const OrderStore = (() => {
 
   /* ---------- public API ---------- */
 
-  function create({ items }) {
+  function create({ orderId, items }) {
     const orders = _load();
 
     const order = {
-      orderId: _generateId(),
+      orderId: orderId || _generateId(),
       items: JSON.parse(JSON.stringify(items)),
       createdAt: new Date().toISOString(),
       status: 'pending'
@@ -983,6 +983,42 @@ const OrderStore = (() => {
 
     return data.ข้อมูล; // { adminId, username }
   }
+
+ // ======================================================
+ // 🛒 STEP A — CREATE ORDER (VIEWER → BACKEND)
+ // ======================================================
+ async function createOrderBackend(items) {
+   const payload = {
+     action: 'createOrder',
+     items: JSON.stringify(
+       items.map(it => ({
+         sku: it['รหัส SKU'],
+         name: it['ชื่อสินค้า'],
+         qty: it['จำนวน'],
+         cost: it['ราคาทุน']
+       }))
+     )
+   };
+
+   const query = new URLSearchParams(payload).toString();
+
+   let res;
+   try {
+     res = await fetch(`${API_BASE}?${query}`);
+   } catch {
+     throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+   }
+
+   const data = await res.json();
+
+   if (data.สถานะ !== 'สำเร็จ') {
+     throw new Error(data.ข้อความ || 'สร้างคำสั่งซื้อไม่สำเร็จ');
+   }
+
+   return data.ข้อมูล; // { orderId }
+ }
+
+ 
 </script>
 
 
@@ -1414,13 +1450,20 @@ if (!state.cart.items.length) {
  });
 }
 
-function goToSummary() {
+async function goToSummary() {
   if (!state.cart.items.length) return;
 
-  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
-  const order = OrderStore.create({
-    items: JSON.parse(JSON.stringify(state.cart.items))
-  });
+   try {
+     showLoading();
+
+     // 1️⃣ สร้าง Order ที่ Backend (SOURCE OF TRUTH)
+     const { orderId } = await createOrderBackend(state.cart.items);
+
+     // 2️⃣ Cache Order ฝั่ง Frontend
+     const order = OrderStore.create({
+       orderId,
+       items: JSON.parse(JSON.stringify(state.cart.items))
+     });
 
   // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
   sessionStorage.setItem(
@@ -1430,6 +1473,12 @@ function goToSummary() {
 
   window.open('summary.html', '_blank');
   showOrderSuccess();
+    
+   } catch (err) {
+     alert(err.message);
+   } finally {
+     hideLoading();
+   }
 }
 
 
