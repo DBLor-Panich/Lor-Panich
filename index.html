@@ -1523,21 +1523,44 @@ if (!state.cart.items.length) {
 function goToSummary() {
   if (!state.cart.items.length) return;
 
-  // 🔗 STEP S4: สร้าง Order ผ่าน OrderStore
-  const order = OrderStore.create({
-    items: JSON.parse(JSON.stringify(state.cart.items))
-  });
+  (async () => {
+    try {
+      showLoading();
 
-  // 🔁 Bridge ชั่วคราวให้ Summary ใช้ได้ (ยังไม่ refactor)
-  sessionStorage.setItem(
-    'order_summary',
-    JSON.stringify(order)
-  );
+      const payload = {
+        customerName: '',
+        note: '',
+        items: JSON.stringify(
+          state.cart.items.map(it => ({
+            sku: it['รหัส SKU'],
+            name: it['ชื่อสินค้า'],
+            qty: it.จำนวน,
+            cost: it.ราคาทุน
+          }))
+        )
+      };
 
-  window.open('summary.html', '_blank');
-  showOrderSuccess();
-}
+      const query = new URLSearchParams(payload).toString();
+      const res = await fetch(`${API_BASE}?action=createOrder&${query}`);
+      const data = await res.json();
 
+      if (data.สถานะ !== 'สำเร็จ') {
+        throw new Error(data.ข้อความ || 'สร้างคำสั่งซื้อไม่สำเร็จ');
+      }
+
+      // ✅ Source of truth จาก Backend
+      sessionStorage.setItem('order_id', data.ข้อมูล.orderId);
+
+      window.open('summary.html', '_blank');
+      showOrderSuccess();
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      hideLoading();
+    }
+  })();
+ }
 
  function showOrderSuccess() {
   document.getElementById('order-success-overlay').style.display = 'block';
