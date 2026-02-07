@@ -383,6 +383,25 @@ body.menu-open .product-card.glass {
    color: rgba(255,235,235,0.95);
  }
 
+ .status-badge.pending {
+   background: rgba(255,200,80,0.25);
+   color: #ffe0a0;
+ }
+ .status-badge.approved {
+   background: rgba(40,180,120,0.25);
+   color: #d8fff0;
+ }
+ .status-badge.rejected {
+   background: rgba(255,80,80,0.28);
+   color: #ffd8d8;
+ }
+
+ .admin-order-card {
+   padding:14px;
+   cursor:pointer;
+ }
+
+
 /* 🛒 STEP 7.1 – Cart Overlay */
 #cart-overlay {
   display: none;
@@ -730,9 +749,9 @@ body.menu-open .product-card.glass {
            >✕</button>
          </div>
 
-         <div class="menu-item" onclick="onAdminLogin()">
-           🔐 เข้าสู่ระบบ (Admin)
-         </div>
+ <div class="menu-item" onclick="openAdminDashboard()">
+   📋 Admin Dashboard
+ </div>
        
          <div class="menu-item" onclick="onSearch()">
            🔍 ค้นหาสินค้า
@@ -750,6 +769,32 @@ body.menu-open .product-card.glass {
      </div>
    </div>
  </div>
+
+ <!-- 🔐 STEP A4.4 — ADMIN DASHBOARD -->
+<div id="admin-dashboard-overlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:120;
+  background:rgba(0,0,0,0.35);
+">
+  <div class="glass" style="
+    position:absolute;
+    inset:16px;
+    padding:16px;
+    overflow:auto;
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:17px;font-weight:700;color:#fff;">
+        📋 Admin Dashboard
+      </div>
+      <button onclick="this.closest('#admin-dashboard-overlay').style.display='none'"
+        style="background:none;border:none;font-size:18px;color:#fff;">✕</button>
+    </div>
+
+    <div id="admin-order-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
 
 
 <!-- GLOBAL STATE -->
