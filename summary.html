@@ -225,20 +225,11 @@ const OrderStore = (() => {
 
   
 <script>
-// 🔗 STEP S5: Summary อ่าน Order จาก OrderStore
-const orders = OrderStore.list();
-const data = orders[0]; // ล่าสุด (newest first)
-
-if (!data) {
-  alert('ไม่พบข้อมูลคำสั่งซื้อ');
-} else {
-  const items = data.items || [];
-
- // STEP 8.5 — Auto-fill document meta
- const createdAt = data.createdAt
-   ? new Date(data.createdAt)
-   : new Date();
-
+ function renderFromBackend({ order, items }) {
+   const createdAt = order['วันที่สร้าง']
+     ? new Date(order['วันที่สร้าง'])
+     : new Date(); 
+   
  const docDate = createdAt.toLocaleDateString('th-TH', {
    year: 'numeric',
    month: 'long',
@@ -332,7 +323,7 @@ if (!data) {
      }
     });
 
-     pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal.toLocaleString()} บาท`;
+      pageTotalEl.innerText = `รวมทั้งสิ้น: ${pageTotal.toLocaleString()} บาท`;
   }
   
  // STEP 8.6 — Print / PDF
@@ -367,6 +358,34 @@ if (!data) {
    };
  }
 
+ async function loadOrderFromBackend(orderId) {
+   try {
+     const res = await fetch(
+       `${API_BASE}?action=getOrderDetail&orderId=${encodeURIComponent(orderId)}`
+     );
+     const data = await res.json();
+
+     if (data.สถานะ !== 'สำเร็จ') {
+       throw new Error(data.ข้อความ || 'โหลดคำสั่งซื้อไม่สำเร็จ');
+     }
+
+     renderFromBackend(data.ข้อมูล);
+
+   } catch (err) {
+     alert(err.message);
+   }
+ }
+
+ // 🔗 STEP C: Load order once on page load
+ document.addEventListener('DOMContentLoaded', () => {
+   const orderId = sessionStorage.getItem('order_id');
+   if (!orderId) {
+     alert('ไม่พบรหัสคำสั่งซื้อ');
+     return;
+   }
+   loadOrderFromBackend(orderId);
+ });
+ 
 </script>
   
 </body>
