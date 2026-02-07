@@ -320,14 +320,33 @@ body.exporting #print-bar {
    }
  }
 
+ function getOrderIdFromUrl() {
+   const params = new URLSearchParams(location.search);
+   return params.get('orderId');
+ }
+
+ async function loadWithRetry(orderId, retry = 0) {
+   try {
+     await loadOrderFromBackend(orderId);
+   } catch (err) {
+     if (retry < 3) {
+       setTimeout(() => {
+         loadWithRetry(orderId, retry + 1);
+       }, 500);
+     } else {
+       alert(err.message || 'ไม่สามารถโหลดคำสั่งซื้อได้');
+     }
+   }
+ }
+ 
  // 🔗 STEP C: Load order once on page load
  document.addEventListener('DOMContentLoaded', () => {
-   const orderId = sessionStorage.getItem('order_id');
+   const orderId = getOrderIdFromUrl();
    if (!orderId) {
      alert('ไม่พบรหัสคำสั่งซื้อ');
      return;
    }
-   loadOrderFromBackend(orderId);
+   loadWithRetry(orderId);
  });
  
 </script>
