@@ -992,7 +992,9 @@ const OrderStore = (() => {
 <script>
   function renderProductList() {
     const container = document.getElementById('product-list');
+    container.classList.remove('is-visible');
     container.innerHTML = '';
+
 
     if (!state.products || state.products.length === 0) {
       container.innerHTML = `
@@ -1022,9 +1024,9 @@ const OrderStore = (() => {
           <div class="product-sku">${p['รหัส SKU'] || ''}</div>
 
           <!-- 🔴 CHANGED: แสดงราคาทุนเท่านั้น -->
-  <div class="product-cost">
-    ทุน ${p['ราคาทุน'] || 0} บาท
-  </div>
+ <div class="product-cost">
+   ทุน ${Number(p['ราคาทุน'] || 0).toLocaleString()} บาท
+ </div>
  <div class="product-stock">
    คงเหลือ ${stock} ชิ้น
  </div>
