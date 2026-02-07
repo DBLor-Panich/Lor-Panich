@@ -954,6 +954,19 @@ const OrderStore = (() => {
   return true;
     }
   };
+
+  // 🔐 STEP A4 — Open Admin Dashboard (Entry Point)
+  function openAdminDashboard() {
+    closeMenu();
+
+    if (!Admin.guard()) return;
+
+    const el = document.getElementById('admin-dashboard-overlay');
+    if (el) el.style.display = 'block';
+
+    // โหลดรายการคำสั่งซื้อจริง
+    renderAdminDashboard();
+  }
 </script>
 
 <script>
