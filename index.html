@@ -1089,6 +1089,61 @@ const OrderStore = (() => {
 
 
 <!-- RENDER FUNCTIONS -->
+  <script>
+
+  // 📋 STEP A4.4 — Render Admin Dashboard (Order List)
+  async function renderAdminDashboard() {
+    const container = document.getElementById('admin-order-list');
+    if (!container) return;
+
+    container.innerHTML = 'กำลังโหลดคำสั่งซื้อ...';
+
+    try {
+      const orders = await getOrders();
+
+      if (!orders.length) {
+        container.innerHTML = `
+          <div class="empty">
+            ยังไม่มีคำสั่งซื้อ
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+
+      orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'admin-order-card glass';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;">
+            <div>
+              <strong>${order.orderId}</strong><br>
+              <small>${order.วันที่สร้าง || ''}</small>
+            </div>
+            <div class="status-badge ${order.status}">
+              ${order.status}
+            </div>
+          </div>
+        `;
+
+        card.onclick = () => {
+          openOrderDetail(order.orderId);
+        };
+
+        container.appendChild(card);
+      });
+
+    } catch (err) {
+      container.innerHTML = `
+        <div class="empty">
+          ${err.message}
+        </div>
+      `;
+    }
+  }
+ </script>
+ 
 <script>
   function renderProductList() {
   const container = document.getElementById('product-list');
