@@ -754,15 +754,19 @@ body.menu-open .product-card.glass {
 
 <!-- GLOBAL STATE -->
 <script>
+  const Core = {
+    mode: 'viewer' // 'viewer' | 'admin'
+  };
+
   const state = {
     products: [],
     selectedProduct: null,
     cart: {
       items: []
     },
-  admin: {
-    loggedIn: false,
-    user: null
+    admin: {
+      loggedIn: false,
+      user: null
     }
   };
 </script>
@@ -880,57 +884,70 @@ const OrderStore = (() => {
     if (el) el.style.display = 'none';
   }
 
-  // 🔐 STEP A3 — Submit Login (REAL)
-  async function submitAdminLogin() {
-    const user = document.getElementById('admin-user').value.trim();
-    const pass = document.getElementById('admin-pass').value.trim();
+// 🔐 STEP B.2 — Submit Login (MODE SWITCH)
+async function submitAdminLogin() {
+  const user = document.getElementById('admin-user').value.trim();
+  const pass = document.getElementById('admin-pass').value.trim();
 
-    if (!user || !pass) {
-      alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
-      return;
-    }
+  if (!user || !pass) {
+    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+    return;
+  }
 
-    try {
-      showLoading();
+  try {
+    showLoading();
 
-      const result = await adminLogin(user, pass);
+    const result = await adminLogin(user, pass);
 
-      // 🔴 CHANGED: state จาก Backend จริง
+    // ✅ 1️⃣ Update Admin State (data)
+    state.admin.loggedIn = true;
+    state.admin.user = {
+      adminId: result.adminId,
+      username: result.username
+    };
+
+    // ✅ 2️⃣ Persist session (single source)
+    sessionStorage.setItem(
+      'admin_session',
+      JSON.stringify(state.admin.user)
+    );
+
+    // 🔑 3️⃣ SWITCH SYSTEM MODE (หัวใจของ STEP B)
+    Core.mode = 'admin';
+
+    closeAdminLogin();
+
+    // (ยังไม่ render admin dashboard ใน STEP นี้)
+    alert('เข้าสู่ระบบผู้ดูแลระบบแล้ว');
+
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// 🔁 STEP B.4 — Restore Admin Session (SINGLE SOURCE)
+function hydrateAdminState() {
+  try {
+    const raw = sessionStorage.getItem('admin_session');
+    if (!raw) return;
+
+    const user = JSON.parse(raw);
+
+    // ✅ valid admin session
+    if (user && user.adminId) {
       state.admin.loggedIn = true;
-      state.admin.user = {
-        adminId: result.adminId,
-        username: result.username
-      };
+      state.admin.user = user;
 
-      // persist session
-      sessionStorage.setItem(
-        'admin_session',
-        JSON.stringify(state.admin.user)
-      );
-
-      closeAdminLogin();
-      alert('เข้าสู่ระบบสำเร็จ');
-
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      hideLoading();
+      // 🔑 sync system mode
+      Core.mode = 'admin';
     }
+  } catch {
+    // ignore corrupted session
   }
+}
 
-  // 🔁 Restore admin session
-  function hydrateAdminState() {
-    try {
-      const raw = sessionStorage.getItem('admin_session');
-      if (!raw) return;
-
-      const user = JSON.parse(raw);
-      if (user?.adminId) {
-        state.admin.loggedIn = true;
-        state.admin.user = user;
-      }
-    } catch {}
-  }
 </script>
 
  <script>
@@ -1676,8 +1693,19 @@ function hideLoading() {
   async function initApp() {
     try {
       showLoading();
-      state.products = await ดึงรายการสินค้า();
-      renderProductList();
+
+      // 🔑 STEP B.3 — Init ตาม System Mode
+      if (Core.mode === 'viewer') {
+        state.products = await ดึงรายการสินค้า();
+        renderProductList();
+        return;
+      }
+
+      if (Core.mode === 'admin') {
+        Admin.render(); // placeholder (ยังไม่ทำ UI หลังบ้านใน STEP นี้)
+        return;
+      }
+
     } catch (err) {
       alert('เกิดข้อผิดพลาด: ' + err.message);
     } finally {
@@ -1686,10 +1714,11 @@ function hideLoading() {
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    hydrateAdminState(); // 🔴 CHANGED
+    hydrateAdminState(); // ต้องมาก่อน เพื่อ set Core.mode
     initApp();
   });
 </script>
+
   
  <!-- VIEWER FLOW : PRODUCT DETAIL -->
  <div id="product-detail-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:50;">
